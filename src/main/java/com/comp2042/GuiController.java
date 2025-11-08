@@ -18,6 +18,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -47,9 +48,21 @@ public class GuiController implements Initializable {
 
     private Timeline timeLine;
 
+    private Stage stage;
+
     private final BooleanProperty isPause = new SimpleBooleanProperty();
 
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
+
+    public void setStage(Stage stage){
+        this.stage = stage;
+    }
+
+    private void toggleFullScreen() {
+        if (stage != null) {
+            stage.setFullScreen(!stage.isFullScreen());
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,7 +89,17 @@ public class GuiController implements Initializable {
                         moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
                         keyEvent.consume();
                     }
+                    /* ADDING A HARD DROP FUNCTION
+                    if (keyEvent.getCode() == KeyCode.SPACE) {
+
+                    } */
                 }
+
+                if (keyEvent.getCode() == KeyCode.F11) {
+                    toggleFullScreen();
+                    keyEvent.consume();
+                }
+
                 if (keyEvent.getCode() == KeyCode.N) {
                     newGame(null);
                 }
