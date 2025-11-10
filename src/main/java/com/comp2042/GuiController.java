@@ -2,6 +2,7 @@ package com.comp2042;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,6 +14,7 @@ import javafx.scene.Group;
 import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -38,6 +40,9 @@ public class GuiController implements Initializable {
     private GridPane brickPanel;
 
     @FXML
+    private BorderPane gameBoard;
+
+    @FXML
     private GameOverPanel gameOverPanel;
 
     private Rectangle[][] displayMatrix;
@@ -56,6 +61,45 @@ public class GuiController implements Initializable {
 
     public void setStage(Stage stage){
         this.stage = stage;
+
+        // Listen for Fullscreen toggle
+        stage.fullScreenProperty().addListener((obs, oldVal, newVal) ->
+                Platform.runLater(this::updateLayout));
+
+        // Listen for maximize/unmaximize
+        stage.maximizedProperty().addListener((obs, oldVal, newVal) ->
+                Platform.runLater(this::updateLayout));
+
+        // Listen for window width changes
+        stage.widthProperty().addListener((obs, oldVal, newVal) ->
+                Platform.runLater(this::updateLayout));
+
+        // Listen for window height changes
+        stage.heightProperty().addListener((obs, oldVal, newVal) ->
+                Platform.runLater(this::updateLayout));
+
+        // Center immediately when stage is first set
+        Platform.runLater(this::updateLayout);
+    }
+
+    private void centerNoti() {
+        double centerX = gameBoard.getLayoutX() + (gameBoard.getWidth() / 2);
+        double centerY = gameBoard.getLayoutY() + (gameBoard.getHeight() / 2);
+
+        // Use the bounds of the group's content
+        double notificationWidth = groupNotification.getBoundsInParent().getWidth();
+        double notificationHeight = groupNotification.getBoundsInParent().getHeight();
+
+        groupNotification.setLayoutX(centerX - notificationWidth / 2);
+        groupNotification.setLayoutY(centerY - notificationHeight / 2);
+    }
+
+    private void updateLayout() {
+        // Center the Gameboard
+        gameBoard.setLayoutX((stage.getWidth() - gameBoard.getWidth()) / 2);
+        gameBoard.setLayoutY((stage.getHeight() - gameBoard.getHeight()) / 2);
+
+        centerNoti();
     }
 
     private void toggleFullScreen() {
@@ -133,8 +177,8 @@ public class GuiController implements Initializable {
                 brickPanel.add(rectangle, j, i);
             }
         }
-        brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
-        brickPanel.setLayoutY(-42 + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
+        brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
+        brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
 
 
         timeLine = new Timeline(new KeyFrame(
@@ -182,8 +226,8 @@ public class GuiController implements Initializable {
 
     private void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
-            brickPanel.setLayoutX(gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
-            brickPanel.setLayoutY(-42 + gamePanel.getLayoutY() + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
+            brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
+            brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
             for (int i = 0; i < brick.getBrickData().length; i++) {
                 for (int j = 0; j < brick.getBrickData()[i].length; j++) {
                     setRectangleData(brick.getBrickData()[i][j], rectangles[i][j]);
