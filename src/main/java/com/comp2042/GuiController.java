@@ -133,10 +133,11 @@ public class GuiController implements Initializable {
                         moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
                         keyEvent.consume();
                     }
-                    /* ADDING A HARD DROP FUNCTION
+                    // ADDING A HARD DROP FUNCTION if SPACE input
                     if (keyEvent.getCode() == KeyCode.SPACE) {
-
-                    } */
+                        dropDown(new MoveEvent(EventType.DROP, EventSource.USER));
+                        keyEvent.consume();
+                    }
                 }
 
                 if (keyEvent.getCode() == KeyCode.F11) {
@@ -259,6 +260,20 @@ public class GuiController implements Initializable {
                 notificationPanel.showScore(groupNotification.getChildren());
             }
             refreshBrick(downData.getViewData());
+        }
+        gamePanel.requestFocus();
+    }
+
+    // Added Function to Instant Drop to the Bottom
+    private void dropDown(MoveEvent event) {
+        if (isPause.getValue() == Boolean.FALSE) {
+            DownData dropData = eventListener.onDropEvent(event);
+            if (dropData.getClearRow() != null && dropData.getClearRow().getLinesRemoved() > 0) {
+                NotificationPanel notificationPanel = new NotificationPanel("+" + dropData.getClearRow().getScoreBonus());
+                groupNotification.getChildren().add(notificationPanel);
+                notificationPanel.showScore(groupNotification.getChildren());
+            }
+            refreshBrick(dropData.getViewData());
         }
         gamePanel.requestFocus();
     }
