@@ -99,6 +99,12 @@ public class GuiController implements Initializable {
         gameBoard.setLayoutX((stage.getWidth() - gameBoard.getWidth()) / 2);
         gameBoard.setLayoutY((stage.getHeight() - gameBoard.getHeight()) / 2);
 
+        // Update brick position to match new gameBoard position
+        if (eventListener != null) {
+            ViewData currentViewData = eventListener.getCurrentViewData();
+                    refreshBrick(currentViewData);
+        }
+
         centerNoti();
     }
 
