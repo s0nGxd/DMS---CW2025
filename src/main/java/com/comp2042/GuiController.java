@@ -99,6 +99,12 @@ public class GuiController implements Initializable {
         gameBoard.setLayoutX((stage.getWidth() - gameBoard.getWidth()) / 2);
         gameBoard.setLayoutY((stage.getHeight() - gameBoard.getHeight()) / 2);
 
+        // Update brick position to match new gameBoard position
+        if (eventListener != null) {
+            ViewData currentViewData = eventListener.getCurrentViewData();
+                    refreshBrick(currentViewData);
+        }
+
         centerNoti();
     }
 
@@ -125,18 +131,24 @@ public class GuiController implements Initializable {
                         refreshBrick(eventListener.onRightEvent(new MoveEvent(EventType.RIGHT, EventSource.USER)));
                         keyEvent.consume();
                     }
-                    if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.W) {
-                        refreshBrick(eventListener.onRotateEvent(new MoveEvent(EventType.ROTATE, EventSource.USER)));
+                    // Added a Key for Clockwise Rotation (to add another for counter-clockwise)
+                    if (keyEvent.getCode() == KeyCode.UP || keyEvent.getCode() == KeyCode.W || keyEvent.getCode() == KeyCode.Z) {
+                        refreshBrick(eventListener.onRotateLeftEvent(new MoveEvent(EventType.ROTATE_LEFT, EventSource.USER)));
+                        keyEvent.consume();
+                    }
+                    if (keyEvent.getCode() == KeyCode.X) {
+                        refreshBrick(eventListener.onRotateRightEvent(new MoveEvent(EventType.ROTATE_RIGHT, EventSource.USER)));
                         keyEvent.consume();
                     }
                     if (keyEvent.getCode() == KeyCode.DOWN || keyEvent.getCode() == KeyCode.S) {
                         moveDown(new MoveEvent(EventType.DOWN, EventSource.USER));
                         keyEvent.consume();
                     }
-                    /* ADDING A HARD DROP FUNCTION
+                    // ADDING A HARD DROP FUNCTION if SPACE input
                     if (keyEvent.getCode() == KeyCode.SPACE) {
-
-                    } */
+                        dropDown(new MoveEvent(EventType.DROP, EventSource.USER));
+                        keyEvent.consume();
+                    }
                 }
 
                 if (keyEvent.getCode() == KeyCode.F11) {
@@ -259,6 +271,20 @@ public class GuiController implements Initializable {
                 notificationPanel.showScore(groupNotification.getChildren());
             }
             refreshBrick(downData.getViewData());
+        }
+        gamePanel.requestFocus();
+    }
+
+    // Added Function to Instant Drop to the Bottom
+    private void dropDown(MoveEvent event) {
+        if (isPause.getValue() == Boolean.FALSE) {
+            DownData dropData = eventListener.onDropEvent(event);
+            if (dropData.getClearRow() != null && dropData.getClearRow().getLinesRemoved() > 0) {
+                NotificationPanel notificationPanel = new NotificationPanel("+" + dropData.getClearRow().getScoreBonus());
+                groupNotification.getChildren().add(notificationPanel);
+                notificationPanel.showScore(groupNotification.getChildren());
+            }
+            refreshBrick(dropData.getViewData());
         }
         gamePanel.requestFocus();
     }

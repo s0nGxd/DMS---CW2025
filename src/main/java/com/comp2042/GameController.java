@@ -39,6 +39,29 @@ public class GameController implements InputEventListener {
     }
 
     @Override
+    public DownData onDropEvent(MoveEvent event) {
+        ClearRow clearRow = null;
+        while(board.moveBrickDown()){
+            // Loop to Keep Dropping until the Bottom
+        }
+            board.mergeBrickToBackground();
+            clearRow = board.clearRows();
+            if (clearRow.getLinesRemoved() > 0) {
+                board.getScore().add(clearRow.getScoreBonus());
+            }
+            if (board.createNewBrick()) {
+                viewGuiController.gameOver();
+            }
+
+            viewGuiController.refreshGameBackground(board.getBoardMatrix());
+
+            if (event.getEventSource() == EventSource.USER) {
+                board.getScore().add(1);
+            }
+        return new DownData(clearRow, board.getViewData());
+    }
+
+    @Override
     public ViewData onLeftEvent(MoveEvent event) {
         board.moveBrickLeft();
         return board.getViewData();
@@ -51,8 +74,14 @@ public class GameController implements InputEventListener {
     }
 
     @Override
-    public ViewData onRotateEvent(MoveEvent event) {
+    public ViewData onRotateLeftEvent(MoveEvent event) {
         board.rotateLeftBrick();
+        return board.getViewData();
+    }
+
+    @Override
+    public ViewData onRotateRightEvent(MoveEvent event) {
+        board.rotateRightBrick();
         return board.getViewData();
     }
 
@@ -61,5 +90,10 @@ public class GameController implements InputEventListener {
     public void createNewGame() {
         board.newGame();
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
+    }
+
+    @Override
+    public ViewData getCurrentViewData() {
+        return board.getViewData();
     }
 }
