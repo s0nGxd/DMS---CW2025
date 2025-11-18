@@ -68,17 +68,53 @@ public class SimpleBoard implements Board {
         }
     }
 
+    private int getBrickType() {
+        int[][] shape = brickRotator.getCurrentShape();
+        for (int i = 0; i < shape.length; i++) {
+            for (int j = 0; j < shape[i].length; j++) {
+                if (shape[i][j] != 0) {
+                    return shape[i][j]; // Return the color value (1-7) to determine the shape
+                }
+            }
+        }
+        return 0;
+    }
+
+    private boolean SRSRotation(NextShapeInfo nextShape) {
+        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
+        int currentState = brickRotator.getCurrentState();
+        int targetState = nextShape.getPosition();
+        int brickType = getBrickType();
+
+        // Get the official SRS kick offsets for rotation
+        Point[] kickOffsets = SRSKickData.getKickOffsets(brickType, currentState, targetState);
+
+        // Try each kick offset in order until one succeed
+        for (Point kick : kickOffsets) {
+            int testX = (int) currentOffset.getX() + kick.x;
+            int testY = (int) currentOffset.getY() - kick.y;
+
+            if (!MatrixOperations.intersect(currentMatrix, nextShape.getShape(), testX, testY)) {
+                // Determine successful rotation with this kick
+                currentOffset.setLocation(testX, testY);
+                brickRotator.setCurrentShape(nextShape.getPosition());
+                return true;
+            }
+        }
+        // All kick attempts failed
+        return false;
+    }
+
     @Override
     public boolean rotateLeftBrick() {
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
-        NextShapeInfo nextShape = brickRotator.getNextShape();
-        boolean conflict = MatrixOperations.intersect(currentMatrix, nextShape.getShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
-        if (conflict) {
-            return false;
-        } else {
-            brickRotator.setCurrentShape(nextShape.getPosition());
-            return true;
-        }
+        NextShapeInfo nextShape = brickRotator.getNextShapeCounterClockwise();
+        return SRSRotation(nextShape);
+    }
+
+    @Override
+    public boolean rotateRightBrick() {
+        NextShapeInfo nextShape = brickRotator.getNextShapeClockwise();
+        return SRSRotation(nextShape);
     }
 
     @Override

@@ -8,7 +8,9 @@ public interface InputEventListener {
 
     ViewData onRightEvent(MoveEvent event);
 
-    ViewData onRotateEvent(MoveEvent event);
+    ViewData onRotateLeftEvent(MoveEvent event);
+
+    ViewData onRotateRightEvent(MoveEvent event);
 
     DownData onDropEvent (MoveEvent event);
 
