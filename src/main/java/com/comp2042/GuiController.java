@@ -49,6 +49,8 @@ public class GuiController implements Initializable {
 
     private InputEventListener eventListener;
 
+    private int[][] currentBoardMatrix;
+
     private Rectangle[][] rectangles;
 
     private Timeline timeLine;
@@ -170,6 +172,8 @@ public class GuiController implements Initializable {
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
+        this.currentBoardMatrix = boardMatrix;
+
         displayMatrix = new Rectangle[boardMatrix.length][boardMatrix[0].length];
         for (int i = 2; i < boardMatrix.length; i++) {
             for (int j = 0; j < boardMatrix[i].length; j++) {
@@ -238,6 +242,18 @@ public class GuiController implements Initializable {
 
     private void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
+            // Clears old Ghost Brick
+            if (currentBoardMatrix != null) {
+                for (int i = 2; i < currentBoardMatrix.length; i++) {
+                    for (int j = 0; j < currentBoardMatrix[i].length; j++) {
+                        setRectangleData(currentBoardMatrix[i][j], displayMatrix[i][j]);
+                    }
+                }
+            }
+
+            // Render new Ghost Brick
+            renderGhostBrick(brick);
+
             brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
             brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
             for (int i = 0; i < brick.getBrickData().length; i++) {
@@ -249,6 +265,7 @@ public class GuiController implements Initializable {
     }
 
     public void refreshGameBackground(int[][] board) {
+        this.currentBoardMatrix = board;
         for (int i = 2; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 setRectangleData(board[i][j], displayMatrix[i][j]);
@@ -287,6 +304,53 @@ public class GuiController implements Initializable {
             refreshBrick(dropData.getViewData());
         }
         gamePanel.requestFocus();
+    }
+
+    // Render the ghost brick together with other bricks (shows where the current brick will land)
+    private void renderGhostBrick(ViewData brick) {
+        // Don't show ghost if brick is already landed
+        if (brick.getyPosition() == brick.getGhostPosition()) {
+            return;
+        }
+
+        // Get ghost position and brick data
+        int ghostY = brick.getGhostPosition();
+        int ghostX = brick.getxPosition();
+        int[][] brickData = brick.getBrickData();
+
+        // Draw ghost onto the game panel
+        for (int i = 0; i < brickData.length; i++) {
+            for (int j = 0; j < brickData[i].length; j++) {
+                if (brickData[i][j] != 0) {
+                    int boardRow = ghostY + i;
+                    int boardCol = ghostX + j;
+
+                    // Make sure its within bounds and within visible area (row 2+)
+                    if (boardRow >= 2 && boardRow < displayMatrix.length &&
+                            boardCol >= 0 && boardCol < displayMatrix[0].length) {
+
+                        // Get the color of the brick
+                        Paint baseColor = getFillColor(brickData[i][j]);
+
+                        // Create semi-transparent version
+                        if (baseColor instanceof Color) {
+                            Color color = (Color) baseColor;
+                            Color ghostColor = new Color(
+                                    color.getRed(),
+                                    color.getGreen(),
+                                    color.getBlue(),
+                                    0.3  // 30% opacity
+                            );
+
+                            // Set the ghost color on the display matrix
+                            displayMatrix[boardRow][boardCol].setFill(ghostColor);
+                            displayMatrix[boardRow][boardCol].setArcHeight(9);
+                            displayMatrix[boardRow][boardCol].setArcWidth(9);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void setEventListener(InputEventListener eventListener) {

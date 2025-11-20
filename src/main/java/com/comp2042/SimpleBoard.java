@@ -73,7 +73,7 @@ public class SimpleBoard implements Board {
         for (int i = 0; i < shape.length; i++) {
             for (int j = 0; j < shape[i].length; j++) {
                 if (shape[i][j] != 0) {
-                    return shape[i][j]; // Return the color value (1-7) to determine the shape
+                    return shape[i][j];
                 }
             }
         }
@@ -125,6 +125,36 @@ public class SimpleBoard implements Board {
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
     }
 
+
+     //Calculates the Y position for Ghost Brick
+    private int calculateGhostPosition() {
+        int ghostY = (int) currentOffset.getY();
+        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
+        int currentX = (int) currentOffset.getX();
+        int[][] currentShape = brickRotator.getCurrentShape();
+
+        // Keep moving down until it hit something
+        while (true) {
+            int testY = ghostY + 1;
+
+            // Check if next position down would cause collision
+            boolean collision = MatrixOperations.intersect(
+                    currentMatrix,
+                    currentShape,
+                    currentX,
+                    testY
+            );
+
+            if (collision) {
+                // Can't go further down, ghostY = landing position
+                return ghostY;
+            }
+
+            // Can go further down
+            ghostY = testY;
+        }
+    }
+
     @Override
     public int[][] getBoardMatrix() {
         return currentGameMatrix;
@@ -132,7 +162,8 @@ public class SimpleBoard implements Board {
 
     @Override
     public ViewData getViewData() {
-        return new ViewData(brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY(), brickGenerator.getNextBrick().getShapeMatrix().get(0));
+        int ghostY = calculateGhostPosition();
+        return new ViewData(brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY(), brickGenerator.getNextBrick().getShapeMatrix().get(0), ghostY);
     }
 
     @Override
