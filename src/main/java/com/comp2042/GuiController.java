@@ -151,6 +151,12 @@ public class GuiController implements Initializable {
                         dropDown(new MoveEvent(EventType.DROP, EventSource.USER));
                         keyEvent.consume();
                     }
+
+                    // ADDED A HOLD FUNCTION
+                    if (keyEvent.getCode() == KeyCode.C) {
+                        refreshBrick(eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER)));
+                        keyEvent.consume();
+                    }
                 }
 
                 if (keyEvent.getCode() == KeyCode.F11) {
