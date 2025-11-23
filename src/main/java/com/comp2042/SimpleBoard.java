@@ -5,6 +5,8 @@ import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleBoard implements Board {
 
@@ -15,6 +17,8 @@ public class SimpleBoard implements Board {
     private int[][] currentGameMatrix;
     private Point currentOffset;
     private final Score score;
+    private Brick heldBrick = null;
+    private boolean heldThisTurn = false;
 
     public SimpleBoard(int width, int height) {
         this.width = width;
@@ -80,6 +84,32 @@ public class SimpleBoard implements Board {
         return 0;
     }
 
+    @Override
+    public boolean holdCurrentBrick() {
+        if (heldThisTurn) {
+            return false;
+        }
+
+        Brick currentBrick = brickRotator.getCurrentBrick();
+
+        if (heldBrick == null) {
+            // First hold
+            heldBrick = currentBrick;
+            Brick newBrick = brickGenerator.getBrick();
+            brickRotator.setBrick(newBrick);
+            currentOffset = new Point(3, 0);
+        } else {
+            // Swap hold
+            Brick temp = heldBrick;
+            heldBrick = currentBrick;
+            brickRotator.setBrick(temp);
+            currentOffset = new Point(3, 0);
+        }
+
+        heldThisTurn = true;
+        return true;
+    }
+
     private boolean SRSRotation(NextShapeInfo nextShape) {
         int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
         int currentState = brickRotator.getCurrentState();
@@ -122,6 +152,10 @@ public class SimpleBoard implements Board {
         Brick currentBrick = brickGenerator.getBrick();
         brickRotator.setBrick(currentBrick);
         currentOffset = new Point(3, 0);
+
+        // Reset hold flag when new brick spawns
+        heldThisTurn = false;
+
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
     }
 
@@ -163,7 +197,16 @@ public class SimpleBoard implements Board {
     @Override
     public ViewData getViewData() {
         int ghostY = calculateGhostPosition();
-        return new ViewData(brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY(), brickGenerator.getNextBrick().getShapeMatrix().get(0), ghostY);
+        int[][] heldBrickData = (heldBrick != null)
+                ? heldBrick.getShapeMatrix().get(0)  // Always show first rotation
+                : null;
+        // Get next 4 bricks data
+        List<int[][]> nextBricksData = new ArrayList<>();
+        List<Brick> nextBricks = brickGenerator.getNextBricks(4);
+        for (Brick brick : nextBricks) {
+            nextBricksData.add(brick.getShapeMatrix().get(0));
+        }
+        return new ViewData(brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY(), brickGenerator.getNextBrick().getShapeMatrix().get(0), ghostY, heldBrickData, nextBricksData);
     }
 
     @Override
@@ -189,6 +232,8 @@ public class SimpleBoard implements Board {
     public void newGame() {
         currentGameMatrix = new int[width][height];
         score.reset();
+        // Resets the hold brick function
+        heldBrick = null;
         createNewBrick();
     }
 }

@@ -9,6 +9,19 @@
 <Pane fx:controller="com.comp2042.GuiController"
       xmlns:fx="http://javafx.com/fxml">
     <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
+
+    <!-- Added Hold Brick Panel -->
+    <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick">
+        <Label text="HOLD" styleClass="nextBrickLabel"/>
+        <GridPane fx:id="holdBrickPanel" vgap="1" hgap="1" prefWidth="80" prefHeight="80"/>
+    </VBox>
+
+    <!-- Added Next Bricks Panel -->
+    <VBox fx:id="nextBricksBox" spacing="10" styleClass="nextBrick">
+        <Label text="NEXT" styleClass="nextBrickLabel"/>
+        <VBox fx:id="nextBricksPanel" spacing="8" prefWidth="80"/>
+    </VBox>
+
     <BorderPane styleClass="gameBoard" fx:id="gameBoard">
         <center>
             <GridPane fx:id="gamePanel" hgap="1" vgap="1" layoutY="30" layoutX="40"/>
