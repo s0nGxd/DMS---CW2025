@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
@@ -24,6 +25,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class GuiController implements Initializable {
@@ -44,6 +46,15 @@ public class GuiController implements Initializable {
 
     @FXML
     private GameOverPanel gameOverPanel;
+
+    @FXML
+    private GridPane holdBrickPanel;
+    @FXML
+    private VBox nextBricksPanel;
+    @FXML
+    private VBox heldBrickBox;
+    @FXML
+    private VBox nextBricksBox;
 
     private Rectangle[][] displayMatrix;
 
@@ -98,8 +109,25 @@ public class GuiController implements Initializable {
 
     private void updateLayout() {
         // Center the Gameboard
-        gameBoard.setLayoutX((stage.getWidth() - gameBoard.getWidth()) / 2);
-        gameBoard.setLayoutY((stage.getHeight() - gameBoard.getHeight()) / 2);
+        double gameBoardX = ((stage.getWidth() - gameBoard.getWidth()) / 2);
+        double gameBoardY = ((stage.getHeight() - gameBoard.getHeight()) / 2);
+        gameBoard.setLayoutX(gameBoardX);
+        gameBoard.setLayoutY(gameBoardY);
+
+        // Position held brick panel to the left of gamePanel
+        double gamePanelX = gameBoardX + gamePanel.getLayoutX();
+        double gamePanelY = gameBoardY + gamePanel.getLayoutY();
+
+        double holdBoxX = gamePanelX - 100; // 100px left of game panel
+        double holdBoxY = gamePanelY + 50; // Slightly below top of game panel
+        heldBrickBox.setLayoutX(holdBoxX);
+        heldBrickBox.setLayoutY(holdBoxY);
+
+        // Position next bricks panel to the right of gamePanel
+        double nextBoxX = gamePanelX + gamePanel.getWidth() + 20;
+        double nextBoxY = gamePanelY + 50; // Same height as held brick panel
+        nextBricksBox.setLayoutX(nextBoxX);
+        nextBricksBox.setLayoutY(nextBoxY);
 
         // Update brick position to match new gameBoard position
         if (eventListener != null) {
@@ -202,6 +230,9 @@ public class GuiController implements Initializable {
         brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
         brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
 
+        // Initialize the hold brick and next brick panel
+        initHoldBrickPanel(brick);
+        initNextBricksPanel(brick);
 
         timeLine = new Timeline(new KeyFrame(
                 Duration.millis(400),
@@ -210,6 +241,62 @@ public class GuiController implements Initializable {
         timeLine.setCycleCount(Timeline.INDEFINITE);
         timeLine.play();
     }
+
+
+    private void initHoldBrickPanel(ViewData viewData) {
+        holdBrickPanel.getChildren().clear();
+        int[][] heldBrickData = viewData.getHeldBrickData();
+
+        if (heldBrickData != null) {
+            // Calculate the size needed for this brick
+            int rows = heldBrickData.length;
+            int cols = heldBrickData[0].length;
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    if (heldBrickData[i][j] != 0) {
+                        Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                        rectangle.setFill(getFillColor(heldBrickData[i][j]));
+                        rectangle.setArcHeight(9);
+                        rectangle.setArcWidth(9);
+                        holdBrickPanel.add(rectangle, j, i);
+                    }
+                }
+            }
+        }
+    }
+
+
+    private void initNextBricksPanel(ViewData viewData) {
+        nextBricksPanel.getChildren().clear();
+        List<int[][]> nextBricksData = viewData.getNextBricksData();
+
+        if (nextBricksData != null) {
+            for (int[][] brickData : nextBricksData) {
+                GridPane nextBrickGrid = new GridPane();
+                nextBrickGrid.setVgap(1);
+                nextBrickGrid.setHgap(1);
+
+                // Calculate the size needed for this brick
+                int rows = brickData.length;
+                int cols = brickData[0].length;
+
+                for (int i = 0; i < rows; i++) {
+                    for (int j = 0; j < cols; j++) {
+                        if (brickData[i][j] != 0) {
+                            Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                            rectangle.setFill(getFillColor(brickData[i][j]));
+                            rectangle.setArcHeight(9);
+                            rectangle.setArcWidth(9);
+                            nextBrickGrid.add(rectangle, j, i);
+                        }
+                    }
+                }
+                nextBricksPanel.getChildren().add(nextBrickGrid);
+            }
+        }
+    }
+
 
     private Paint getFillColor(int i) {
         Paint returnPaint;
@@ -267,6 +354,9 @@ public class GuiController implements Initializable {
                     setRectangleData(brick.getBrickData()[i][j], rectangles[i][j]);
                 }
             }
+            // Update Hold & Next Bricks Panel
+            initHoldBrickPanel(brick);
+            initNextBricksPanel(brick);
         }
     }
 

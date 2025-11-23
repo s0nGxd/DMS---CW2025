@@ -5,6 +5,8 @@ import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleBoard implements Board {
 
@@ -198,7 +200,13 @@ public class SimpleBoard implements Board {
         int[][] heldBrickData = (heldBrick != null)
                 ? heldBrick.getShapeMatrix().get(0)  // Always show first rotation
                 : null;
-        return new ViewData(brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY(), brickGenerator.getNextBrick().getShapeMatrix().get(0), ghostY, heldBrickData);
+        // Get next 4 bricks data
+        List<int[][]> nextBricksData = new ArrayList<>();
+        List<Brick> nextBricks = brickGenerator.getNextBricks(4);
+        for (Brick brick : nextBricks) {
+            nextBricksData.add(brick.getShapeMatrix().get(0));
+        }
+        return new ViewData(brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY(), brickGenerator.getNextBrick().getShapeMatrix().get(0), ghostY, heldBrickData, nextBricksData);
     }
 
     @Override
