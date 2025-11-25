@@ -56,6 +56,9 @@ public class GuiController implements Initializable {
     @FXML
     private VBox nextBricksBox;
 
+    @FXML
+    private VBox footerArea;
+
     private Rectangle[][] displayMatrix;
 
     private InputEventListener eventListener;
@@ -114,11 +117,11 @@ public class GuiController implements Initializable {
         gameBoard.setLayoutX(gameBoardX);
         gameBoard.setLayoutY(gameBoardY);
 
-        // Position held brick panel to the left of gamePanel
+        // Position held brick panel to the left of gamePanel - MOVED FURTHER LEFT
         double gamePanelX = gameBoardX + gamePanel.getLayoutX();
         double gamePanelY = gameBoardY + gamePanel.getLayoutY();
 
-        double holdBoxX = gamePanelX - 100; // 100px left of game panel
+        double holdBoxX = gamePanelX - 125;
         double holdBoxY = gamePanelY + 50; // Slightly below top of game panel
         heldBrickBox.setLayoutX(holdBoxX);
         heldBrickBox.setLayoutY(holdBoxY);
@@ -128,6 +131,14 @@ public class GuiController implements Initializable {
         double nextBoxY = gamePanelY + 50; // Same height as held brick panel
         nextBricksBox.setLayoutX(nextBoxX);
         nextBricksBox.setLayoutY(nextBoxY);
+
+        // Position footer at the bottom center
+        if (footerArea != null) {
+            double footerX = (stage.getWidth() - footerArea.getWidth()) / 2;
+            double footerY = stage.getHeight() - footerArea.getHeight() - 20; // 20px from bottom
+            footerArea.setLayoutX(footerX);
+            footerArea.setLayoutY(footerY);
+        }
 
         // Update brick position to match new gameBoard position
         if (eventListener != null) {

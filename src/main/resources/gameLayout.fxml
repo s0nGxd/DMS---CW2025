@@ -7,32 +7,69 @@
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
 <Pane fx:controller="com.comp2042.GuiController"
-      xmlns:fx="http://javafx.com/fxml">
-    <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
+      xmlns:fx="http://javafx.com/fxml"
+      styleClass="root">
 
-    <!-- Added Hold Brick Panel -->
-    <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick">
-        <Label text="HOLD" styleClass="nextBrickLabel"/>
-        <GridPane fx:id="holdBrickPanel" vgap="1" hgap="1" prefWidth="80" prefHeight="80"/>
-    </VBox>
-
-    <!-- Added Next Bricks Panel -->
-    <VBox fx:id="nextBricksBox" spacing="10" styleClass="nextBrick">
-        <Label text="NEXT" styleClass="nextBrickLabel"/>
-        <VBox fx:id="nextBricksPanel" spacing="8" prefWidth="80"/>
-    </VBox>
-
+    <!-- Game board first (background) -->
     <BorderPane styleClass="gameBoard" fx:id="gameBoard">
         <center>
             <GridPane fx:id="gamePanel" hgap="1" vgap="1" layoutY="30" layoutX="40"/>
         </center>
     </BorderPane>
 
+    <!-- Brick panel second (foreground) -->
+    <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
+
+    <!-- Notifications third -->
     <Group fx:id="groupNotification" layoutX="14" layoutY="203">
         <VBox alignment="CENTER">
             <GameOverPanel fx:id="gameOverPanel"/>
         </VBox>
     </Group>
+
+    <!-- Hold panel - moved further left -->
+    <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick">
+        <Label text="HOLD" styleClass="nextBrickLabel"/>
+        <GridPane fx:id="holdBrickPanel" vgap="1" hgap="1" prefWidth="80" prefHeight="80"/>
+    </VBox>
+
+    <!-- Next pieces panel -->
+    <VBox fx:id="nextBricksBox" spacing="10" styleClass="nextBrick">
+        <Label text="NEXT" styleClass="nextBrickLabel"/>
+        <VBox fx:id="nextBricksPanel" spacing="8" prefWidth="80"/>
+    </VBox>
+
+    <!-- Footer with controls -->
+    <VBox fx:id="footerArea" styleClass="footer-area" alignment="CENTER" spacing="8" layoutY="550">
+        <Label text="CONTROLS" styleClass="controls-title"/>
+        <HBox styleClass="controls-container" spacing="12" alignment="CENTER">
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="← →" styleClass="control-key"/>
+                <Label text="MOVE" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="↑" styleClass="control-key"/>
+                <Label text="ROTATE" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="↓" styleClass="control-key"/>
+                <Label text="SOFT DROP" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="SPACE" styleClass="control-key"/>
+                <Label text="HARD DROP" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="C" styleClass="control-key"/>
+                <Label text="HOLD" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="N" styleClass="control-key"/>
+                <Label text="NEW GAME" styleClass="control-description"/>
+            </VBox>
+        </HBox>
+    </VBox>
+
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>
