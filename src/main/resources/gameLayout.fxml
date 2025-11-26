@@ -10,37 +10,46 @@
       xmlns:fx="http://javafx.com/fxml"
       styleClass="root">
 
-    <!-- Game board first (background) -->
-    <BorderPane styleClass="gameBoard" fx:id="gameBoard">
+    <!-- Title and Score Header -->
+    <HBox fx:id="headerArea" styleClass="header-area" alignment="CENTER" spacing="20" prefHeight="60">
+        <Label text="TetrisJFX" styleClass="game-title"/>
+        <VBox alignment="CENTER_RIGHT" styleClass="score-container">
+            <Label text="SCORE" styleClass="score-label"/>
+            <Label fx:id="scoreValue" text="0" styleClass="score-value"/>
+        </VBox>
+    </HBox>
+
+    <!-- Game board (background) -->
+    <BorderPane styleClass="gameBoard" fx:id="gameBoard" prefWidth="200" prefHeight="400">
         <center>
-            <GridPane fx:id="gamePanel" hgap="1" vgap="1" layoutY="30" layoutX="40"/>
+            <GridPane fx:id="gamePanel" hgap="1" vgap="1"/>
         </center>
     </BorderPane>
 
-    <!-- Brick panel second (foreground) -->
+    <!-- Brick panel (foreground) -->
     <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
 
     <!-- Notifications third -->
-    <Group fx:id="groupNotification" layoutX="14" layoutY="203">
+    <Group fx:id="groupNotification">
         <VBox alignment="CENTER">
             <GameOverPanel fx:id="gameOverPanel"/>
         </VBox>
     </Group>
 
-    <!-- Hold panel - moved further left -->
-    <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick">
+    <!-- Hold panel -->
+    <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick" prefWidth="100" prefHeight="120">
         <Label text="HOLD" styleClass="nextBrickLabel"/>
         <GridPane fx:id="holdBrickPanel" vgap="1" hgap="1" prefWidth="80" prefHeight="80"/>
     </VBox>
 
     <!-- Next pieces panel -->
-    <VBox fx:id="nextBricksBox" spacing="10" styleClass="nextBrick">
+    <VBox fx:id="nextBricksBox" spacing="10" styleClass="nextBrick" prefWidth="100" prefHeight="120">
         <Label text="NEXT" styleClass="nextBrickLabel"/>
         <VBox fx:id="nextBricksPanel" spacing="8" prefWidth="80"/>
     </VBox>
 
     <!-- Footer with controls -->
-    <VBox fx:id="footerArea" styleClass="footer-area" alignment="CENTER" spacing="8" layoutY="550">
+    <VBox fx:id="footerArea" styleClass="footer-area" alignment="CENTER" spacing="8" prefHeight="80">
         <Label text="CONTROLS" styleClass="controls-title"/>
         <HBox styleClass="controls-container" spacing="12" alignment="CENTER">
             <VBox alignment="CENTER" spacing="2">
@@ -48,7 +57,7 @@
                 <Label text="MOVE" styleClass="control-description"/>
             </VBox>
             <VBox alignment="CENTER" spacing="2">
-                <Label text="↑" styleClass="control-key"/>
+                <Label text="Z/↑" styleClass="control-key"/>
                 <Label text="ROTATE" styleClass="control-description"/>
             </VBox>
             <VBox alignment="CENTER" spacing="2">

@@ -11,11 +11,13 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -58,6 +60,12 @@ public class GuiController implements Initializable {
 
     @FXML
     private VBox footerArea;
+
+    @FXML
+    private Label scoreValue;
+
+    @FXML
+    private HBox headerArea;
 
     private Rectangle[][] displayMatrix;
 
@@ -111,39 +119,80 @@ public class GuiController implements Initializable {
     }
 
     private void updateLayout() {
-        // Center the Gameboard
-        double gameBoardX = ((stage.getWidth() - gameBoard.getWidth()) / 2);
-        double gameBoardY = ((stage.getHeight() - gameBoard.getHeight()) / 2);
+        if (stage == null) return;
+
+        // Get window dimensions
+        double windowWidth = stage.getWidth();
+        double windowHeight = stage.getHeight();
+
+        // Calculated total width of game area (side panels + game panel + spacing)
+        double heldBrickWidth = heldBrickBox != null ? heldBrickBox.getWidth() : 100;
+        double gamePanelWidth = gamePanel.getWidth();
+        double nextBrickWidth = nextBricksBox != null ? nextBricksBox.getWidth() : 100;
+        double sideSpacing = 20;
+        double totalWidth = heldBrickWidth + gamePanelWidth + nextBrickWidth + (2 * sideSpacing);
+
+        // Calculated total height of all elements (header + game panel + footer + spacing)
+        double headerHeight = headerArea != null ? headerArea.getHeight() : 60;
+        double gamePanelHeight = gamePanel.getHeight();
+        double footerHeight = footerArea != null ? footerArea.getHeight() : 80;
+        double verticalSpacing = 20;
+        double totalHeight = headerHeight + gamePanelHeight + footerHeight + (2 * verticalSpacing);
+
+        // Calculate starting positions to center everything
+        double startX = (windowWidth - totalWidth) / 2;
+        double startY = (windowHeight - totalHeight) / 2;
+
+        // Position header at the top
+        if (headerArea != null) {
+            double headerX = startX + (totalWidth - headerArea.getWidth()) / 2;
+            double headerY = startY;
+            headerArea.setLayoutX(headerX);
+            headerArea.setLayoutY(headerY);
+        }
+
+        // Position game board below header
+        double gameBoardY = startY + headerHeight + verticalSpacing;
+        double gameBoardX = startX + heldBrickWidth + sideSpacing;
         gameBoard.setLayoutX(gameBoardX);
         gameBoard.setLayoutY(gameBoardY);
 
-        // Position held brick panel to the left of gamePanel - MOVED FURTHER LEFT
-        double gamePanelX = gameBoardX + gamePanel.getLayoutX();
-        double gamePanelY = gameBoardY + gamePanel.getLayoutY();
+        // Position held brick panel to the left of game panel
+        if (heldBrickBox != null) {
+            double holdBoxX = startX;
+            double holdBoxY = gameBoardY + (gamePanelHeight - heldBrickBox.getHeight()) / 2;
+            heldBrickBox.setLayoutX(holdBoxX);
+            heldBrickBox.setLayoutY(holdBoxY);
+        }
 
-        double holdBoxX = gamePanelX - 125;
-        double holdBoxY = gamePanelY + 50; // Slightly below top of game panel
-        heldBrickBox.setLayoutX(holdBoxX);
-        heldBrickBox.setLayoutY(holdBoxY);
+        // Position next bricks panel to the right of game panel
+        if (nextBricksBox != null) {
+            double nextBoxX = startX + heldBrickWidth + gamePanelWidth + (2 * sideSpacing);
+            double nextBoxY = gameBoardY + (gamePanelHeight - nextBricksBox.getHeight()) / 2;
+            nextBricksBox.setLayoutX(nextBoxX);
+            nextBricksBox.setLayoutY(nextBoxY);
+        }
 
-        // Position next bricks panel to the right of gamePanel
-        double nextBoxX = gamePanelX + gamePanel.getWidth() + 20;
-        double nextBoxY = gamePanelY + 50; // Same height as held brick panel
-        nextBricksBox.setLayoutX(nextBoxX);
-        nextBricksBox.setLayoutY(nextBoxY);
-
-        // Position footer at the bottom center
+        // Position footer below game panel
         if (footerArea != null) {
-            double footerX = (stage.getWidth() - footerArea.getWidth()) / 2;
-            double footerY = stage.getHeight() - footerArea.getHeight() - 20; // 20px from bottom
+            double footerX = startX + (totalWidth - footerArea.getWidth()) / 2;
+            double footerY = startY + headerHeight + gamePanelHeight + (2 * verticalSpacing);
             footerArea.setLayoutX(footerX);
             footerArea.setLayoutY(footerY);
         }
 
-        // Update brick position to match new gameBoard position
+        // Position active brick panel to match game board
+        if (brickPanel != null) {
+            brickPanel.setLayoutX(gameBoard.getLayoutX());
+            brickPanel.setLayoutY(gameBoard.getLayoutY());
+        }
+
+        // Update brick position
         if (eventListener != null) {
             ViewData currentViewData = eventListener.getCurrentViewData();
-                    refreshBrick(currentViewData);
+            if (currentViewData != null) {
+                refreshBrick(currentViewData);
+            }
         }
 
         centerNoti();
@@ -465,6 +514,9 @@ public class GuiController implements Initializable {
     }
 
     public void bindScore(IntegerProperty integerProperty) {
+        if (scoreValue != null && integerProperty != null) {
+            scoreValue.textProperty().bind(integerProperty.asString());
+        }
     }
 
     public void gameOver() {

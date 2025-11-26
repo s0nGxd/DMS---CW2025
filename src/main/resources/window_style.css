@@ -163,3 +163,35 @@
 .gameBoard {
     -fx-mouse-transparent: false;
 }
+
+.header-area {
+    -fx-padding: 0 0 10px 0;
+    -fx-border-color: #2a2d3a;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.game-title {
+    -fx-font-family: "Segoe UI", "Arial Black", sans-serif;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7aa2f7;
+    -fx-effect: dropshadow(gaussian, rgba(122, 162, 247, 0.3), 8, 0.3, 0, 2);
+}
+
+.score-container {
+    -fx-padding: 5px 0;
+}
+
+.score-label {
+    -fx-font-size: 10px;
+    -fx-text-fill: #565f89;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.5px;
+}
+
+.score-value {
+    -fx-font-size: 18px;
+    -fx-text-fill: #c0caf5;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI", "Consolas", monospace;
+}
