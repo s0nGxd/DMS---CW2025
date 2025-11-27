@@ -55,40 +55,21 @@ public class MainMenuController implements Initializable {
     }
 
     private void startGame(GameMode mode) {
-        try {
-            URL location = getClass().getClassLoader().getResource("gameLayout.fxml");
-            FXMLLoader fxmlLoader = new FXMLLoader(location);
-            Parent root = fxmlLoader.load();
-            GuiController controller = fxmlLoader.getController();
-
-            Scene scene = new Scene(root, 800, 600);
-            stage.setScene(scene);
-            controller.setStage(stage);
-            controller.setGameMode(mode);
-
-            // Used to return to main menu
-            controller.setMainMenuStage(stage, this);
-
-            new GameController(controller);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        StageManager stageManager = StageManager.getInstance();
+        stageManager.switchScene("gameLayout.fxml", controller -> {
+            GuiController guiController = (GuiController) controller;
+            guiController.setStage(stageManager.getPrimaryStage());
+            guiController.setGameMode(mode);
+            guiController.setStageManager(stageManager);
+            new GameController(guiController);
+        });
     }
 
     public void showMainMenu() {
-        try {
-            URL location = getClass().getClassLoader().getResource("mainMenu.fxml");
-            FXMLLoader fxmlLoader = new FXMLLoader(location);
-            Parent root = fxmlLoader.load();
-            MainMenuController controller = fxmlLoader.getController();
-
-            Scene scene = new Scene(root, 600, 700);
-            stage.setScene(scene);
-            controller.setStage(stage);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        StageManager stageManager = StageManager.getInstance();
+        stageManager.switchScene("mainMenu.fxml", controller -> {
+            MainMenuController menuController = (MainMenuController) controller;
+            menuController.setStage(stageManager.getPrimaryStage());
+        });
     }
 }

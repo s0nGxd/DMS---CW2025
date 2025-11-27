@@ -34,6 +34,8 @@ public class GuiController implements Initializable {
 
     private static final int BRICK_SIZE = 20;
 
+    private StageManager stageManager;
+
     private GameMode currentGameMode = GameMode.ZEN; // Default mode
     private Stage mainStage;
     private MainMenuController mainMenuController;
@@ -87,6 +89,10 @@ public class GuiController implements Initializable {
 
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
 
+    public void setStageManager(StageManager stageManager) {
+        this.stageManager = stageManager;
+    }
+
     public void setStage(Stage stage){
         this.stage = stage;
 
@@ -128,8 +134,11 @@ public class GuiController implements Initializable {
         if (timeLine != null) {
             timeLine.stop();
         }
-        if (mainMenuController != null) {
-            mainMenuController.showMainMenu();
+        if (stageManager != null) {
+            stageManager.switchScene("mainMenu.fxml", controller -> {
+                MainMenuController menuController = (MainMenuController) controller;
+                menuController.setStage(stageManager.getPrimaryStage());
+            });
         }
     }
 
@@ -226,8 +235,8 @@ public class GuiController implements Initializable {
     }
 
     private void toggleFullScreen() {
-        if (stage != null) {
-            stage.setFullScreen(!stage.isFullScreen());
+        if (stageManager != null) {
+            stageManager.toggleFullscreen();
         }
     }
 
