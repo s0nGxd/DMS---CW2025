@@ -34,6 +34,10 @@ public class GuiController implements Initializable {
 
     private static final int BRICK_SIZE = 20;
 
+    private GameMode currentGameMode = GameMode.ZEN; // Default mode
+    private Stage mainStage;
+    private MainMenuController mainMenuController;
+
     @FXML
     private GridPane gamePanel;
 
@@ -104,6 +108,29 @@ public class GuiController implements Initializable {
 
         // Center immediately when stage is first set
         Platform.runLater(this::updateLayout);
+    }
+    
+    public void setGameMode(GameMode mode) {
+        this.currentGameMode = mode;
+        // Used to configure game modes
+    }
+
+    public GameMode getCurrentGameMode() {
+        return currentGameMode;
+    }
+
+    public void setMainMenuStage(Stage stage, MainMenuController menuController) {
+        this.mainStage = stage;
+        this.mainMenuController = menuController;
+    }
+
+    private void returnToMainMenu() {
+        if (timeLine != null) {
+            timeLine.stop();
+        }
+        if (mainMenuController != null) {
+            mainMenuController.showMainMenu();
+        }
     }
 
     private void centerNoti() {
@@ -243,6 +270,12 @@ public class GuiController implements Initializable {
                     // ADDED A HOLD FUNCTION
                     if (keyEvent.getCode() == KeyCode.C) {
                         refreshBrick(eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER)));
+                        keyEvent.consume();
+                    }
+
+                    // ESCAPE KEY BRINGS TO MAIN MENU
+                    if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                        returnToMainMenu();
                         keyEvent.consume();
                     }
                 }

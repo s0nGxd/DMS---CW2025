@@ -1,3 +1,117 @@
+/* Main Menu Styles */
+.menu-container {
+    -fx-padding: 40px;
+    -fx-max-width: 600px;
+}
+
+.title-section {
+    -fx-padding: 0 0 20px 0;
+}
+
+.main-title {
+    -fx-font-family: "Let's go Digital", "Segoe UI", sans-serif;
+    -fx-font-size: 56px;
+    -fx-font-weight: bold;
+    -fx-fill: #7aa2f7;
+    -fx-effect: dropshadow(gaussian, rgba(122, 162, 247, 0.5), 15, 0.5, 0, 3);
+}
+
+.subtitle {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 16px;
+    -fx-fill: #a9b1d6;
+    -fx-font-weight: normal;
+}
+
+.game-mode-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-max-height: 450px;
+    -fx-min-height: 450px;
+}
+
+.game-mode-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.game-mode-scroll .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.game-mode-scroll .scroll-bar .thumb {
+    -fx-background-color: rgba(122, 162, 247, 0.3);
+    -fx-background-radius: 4px;
+}
+
+.game-mode-scroll .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(122, 162, 247, 0.5);
+}
+
+.game-modes-container {
+    -fx-padding: 10px;
+}
+
+.game-mode-card {
+    -fx-background-color: rgba(36, 40, 59, 0.8);
+    -fx-border-color: #2a2d3a;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 25px;
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0.2, 0, 2);
+}
+
+.game-mode-card:hover {
+    -fx-background-color: rgba(42, 45, 58, 0.95);
+    -fx-border-color: #7aa2f7;
+    -fx-effect: dropshadow(gaussian, rgba(122, 162, 247, 0.4), 15, 0.4, 0, 3);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.mode-title {
+    -fx-font-family: "Let's go Digital", "Segoe UI", sans-serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-fill: #7aa2f7;
+}
+
+.mode-subtitle {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-fill: #e0af68;
+    -fx-font-weight: bold;
+}
+
+.mode-description {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-fill: #a9b1d6;
+    -fx-text-alignment: center;
+}
+
+.menu-footer {
+    -fx-padding: 20px 0 0 0;
+}
+
+.footer-text {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-fill: #a9b1d6;
+}
+
+.footer-hint {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 11px;
+    -fx-fill: #565f89;
+    -fx-font-style: italic;
+}
+
+
+/* Gameplay Layout Styles */
 .root {
     -fx-background-color: #1a1b26;
     -fx-background-image: none;

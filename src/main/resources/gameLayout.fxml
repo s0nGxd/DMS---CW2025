@@ -26,16 +26,6 @@
         </center>
     </BorderPane>
 
-    <!-- Brick panel (foreground) -->
-    <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
-
-    <!-- Notifications third -->
-    <Group fx:id="groupNotification">
-        <VBox alignment="CENTER">
-            <GameOverPanel fx:id="gameOverPanel"/>
-        </VBox>
-    </Group>
-
     <!-- Hold panel -->
     <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick" prefWidth="100" prefHeight="120">
         <Label text="HOLD" styleClass="nextBrickLabel"/>
@@ -78,6 +68,16 @@
             </VBox>
         </HBox>
     </VBox>
+
+    <!-- Brick panel (On Top of GamePanel) -->
+    <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
+
+    <!-- Notifications (Most Top) -->
+    <Group fx:id="groupNotification">
+        <VBox alignment="CENTER">
+            <GameOverPanel fx:id="gameOverPanel"/>
+        </VBox>
+    </Group>
 
     <stylesheets>
         <URL value="@window_style.css"/>

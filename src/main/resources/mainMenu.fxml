@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import java.net.URL?>
+
+<StackPane fx:controller="com.comp2042.MainMenuController"
+           xmlns:fx="http://javafx.com/fxml"
+           stylesheets="@window_style.css"
+           styleClass="root">
+
+    <VBox alignment="CENTER" spacing="40" styleClass="menu-container">
+
+        <!-- Title -->
+        <VBox alignment="CENTER" spacing="10" styleClass="title-section">
+            <Text text="TETRISJFX" styleClass="main-title"/>
+            <Text text="Select Game Mode" styleClass="subtitle"/>
+        </VBox>
+
+        <!-- Game Modes -->
+        <ScrollPane fx:id="gameModeScrollPane"
+                    fitToWidth="true"
+                    styleClass="game-mode-scroll">
+            <VBox fx:id="gameModesContainer"
+                  alignment="CENTER"
+                  spacing="20"
+                  styleClass="game-modes-container">
+
+                <!-- Zen Mode -->
+                <VBox styleClass="game-mode-card" onMouseClicked="#selectZenMode">
+                    <Text text="ZEN" styleClass="mode-title"/>
+                    <Text text="Infinite Mode" styleClass="mode-subtitle"/>
+                    <Text text="Play without time limits or line goals. Perfect for relaxation and practice."
+                          styleClass="mode-description" wrappingWidth="300"/>
+                </VBox>
+
+                <!-- Sprint Mode -->
+                <VBox styleClass="game-mode-card" onMouseClicked="#selectSprintMode">
+                    <Text text="SPRINT" styleClass="mode-title"/>
+                    <Text text="40 Lines Mode" styleClass="mode-subtitle"/>
+                    <Text text="Race against time to clear 40 lines as fast as possible."
+                          styleClass="mode-description" wrappingWidth="300"/>
+                </VBox>
+
+                <!-- Blitz Mode -->
+                <VBox styleClass="game-mode-card" onMouseClicked="#selectBlitzMode">
+                    <Text text="BLITZ" styleClass="mode-title"/>
+                    <Text text="3 Minute Mode" styleClass="mode-subtitle"/>
+                    <Text text="Score as many points as you can in just 3 minutes."
+                          styleClass="mode-description" wrappingWidth="300"/>
+                </VBox>
+
+                <!-- Pitfall Mode -->
+                <VBox styleClass="game-mode-card" onMouseClicked="#selectPitfallMode">
+                    <Text text="PITFALL" styleClass="mode-title"/>
+                    <Text text="Progressive Levels" styleClass="mode-subtitle"/>
+                    <Text text="Survive increasingly difficult levels with rising speed and challenges."
+                          styleClass="mode-description" wrappingWidth="300"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+
+        <!-- Controls Instruction Footer -->
+        <VBox alignment="CENTER" spacing="8" styleClass="menu-footer">
+            <Text text="Click on a mode to start playing" styleClass="footer-text"/>
+            <Text text="Press ESC anytime to return to menu" styleClass="footer-hint"/>
+        </VBox>
+
+    </VBox>
+
+</StackPane>
