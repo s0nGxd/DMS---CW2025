@@ -73,6 +73,12 @@ public class GuiController implements Initializable {
     @FXML
     private HBox headerArea;
 
+    @FXML
+    private Label gameModeLabel;
+
+    @FXML
+    private Label progressLabel; // For SPRINT/PITFALL progress
+
     private Rectangle[][] displayMatrix;
 
     private InputEventListener eventListener;
@@ -336,12 +342,75 @@ public class GuiController implements Initializable {
         initHoldBrickPanel(brick);
         initNextBricksPanel(brick);
 
+        // Get fall speed
+        int speed = 400;  // Default speed
+        if (eventListener instanceof GameController) {
+            GameController gameController = (GameController) eventListener;
+            SimpleBoard simpleBoard = gameController.getSimpleBoard();
+            if (simpleBoard != null) {
+                speed = simpleBoard.getFallSpeed();
+            }
+        }
+
         timeLine = new Timeline(new KeyFrame(
-                Duration.millis(400),
-                ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
+                Duration.millis(speed),
+                ae -> {
+                    moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD));
+                    updateGameModeUI();
+                }
         ));
         timeLine.setCycleCount(Timeline.INDEFINITE);
         timeLine.play();
+    }
+
+    private void updateGameModeUI() {
+        if (!(eventListener instanceof GameController)) return;
+
+        GameController gameController = (GameController) eventListener;
+        SimpleBoard simpleBoard = gameController.getSimpleBoard();
+
+        if (simpleBoard == null || progressLabel == null) return;
+
+        switch (simpleBoard.getGameMode()) {
+            case SPRINT:
+                int remaining = 40 - simpleBoard.getLinesCleared();
+                progressLabel.setText("Lines: " + remaining);
+                break;
+            case BLITZ:
+                long elapsed = System.currentTimeMillis() -
+                        simpleBoard.getGameStartTime();
+                int seconds = (int) ((180000 - elapsed) / 1000);
+                progressLabel.setText("Time: " + seconds + "s");
+                break;
+            case PITFALL:
+                progressLabel.setText("Level: " + simpleBoard.getCurrentLevel());
+                // Update speed
+                if (timeLine != null) {
+                    timeLine.setRate(400.0 / simpleBoard.getFallSpeed());
+                }
+                break;
+            case ZEN:
+                progressLabel.setText("Zen Mode");
+                break;
+        }
+    }
+
+    public void gameWon() {
+        timeLine.stop();
+
+        // Create a win message similar to game over
+        Label winLabel = new Label("YOU WIN!");
+        winLabel.getStyleClass().add("gameOverStyle");
+
+        BorderPane winPanel = new BorderPane();
+        winPanel.setCenter(winLabel);
+        winPanel.setVisible(true);
+
+        // Add to notification group
+        groupNotification.getChildren().clear();
+        groupNotification.getChildren().add(winPanel);
+
+        isGameOver.setValue(Boolean.TRUE);
     }
 
 

@@ -55,14 +55,23 @@ public class MainMenuController implements Initializable {
     }
 
     private void startGame(GameMode mode) {
-        StageManager stageManager = StageManager.getInstance();
-        stageManager.switchScene("gameLayout.fxml", controller -> {
-            GuiController guiController = (GuiController) controller;
-            guiController.setStage(stageManager.getPrimaryStage());
-            guiController.setGameMode(mode);
-            guiController.setStageManager(stageManager);
-            new GameController(guiController);
-        });
+        try {
+            URL location = getClass().getClassLoader().getResource("gameLayout.fxml");
+            FXMLLoader fxmlLoader = new FXMLLoader(location);
+            Parent root = fxmlLoader.load();
+            GuiController controller = fxmlLoader.getController();
+
+            Scene scene = new Scene(root, 800, 600);
+            stage.setScene(scene);
+            controller.setStage(stage);
+            controller.setGameMode(mode);
+            controller.setMainMenuStage(stage, this);
+
+            new GameController(controller, mode); // Pass mode here
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void showMainMenu() {

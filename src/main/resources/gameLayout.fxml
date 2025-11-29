@@ -16,6 +16,7 @@
         <VBox alignment="CENTER_RIGHT" styleClass="score-container">
             <Label text="SCORE" styleClass="score-label"/>
             <Label fx:id="scoreValue" text="0" styleClass="score-value"/>
+            <Label fx:id="progressLabel" text="" styleClass="score-label"/>
         </VBox>
     </HBox>
 

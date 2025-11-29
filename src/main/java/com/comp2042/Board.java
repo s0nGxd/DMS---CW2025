@@ -27,4 +27,16 @@ public interface Board {
     Score getScore();
 
     void newGame();
+
+    void setGameMode(GameMode mode);
+
+    GameMode getGameMode();
+
+    int getLinesCleared();
+
+    long getGameStartTime();
+
+    int getCurrentLevel();
+
+    int getFallSpeed();
 }

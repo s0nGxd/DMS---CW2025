@@ -20,6 +20,12 @@ public class SimpleBoard implements Board {
     private Brick heldBrick = null;
     private boolean heldThisTurn = false;
 
+    private GameMode gameMode = GameMode.ZEN;
+    private int linesCleared = 0;  // For SPRINT
+    private long gameStartTime = 0;  // For BLITZ
+    private int currentLevel = 1;  // For PITFALL
+    private int fallSpeed = 400;  // For PITFALL (milliseconds)
+
     public SimpleBoard(int width, int height) {
         this.width = width;
         this.height = height;
@@ -27,6 +33,30 @@ public class SimpleBoard implements Board {
         brickGenerator = new RandomBrickGenerator();
         brickRotator = new BrickRotator();
         score = new Score();
+    }
+
+    public void setGameMode(GameMode mode) {
+        this.gameMode = mode;
+    }
+
+    public GameMode getGameMode() {
+        return gameMode;
+    }
+
+    public int getLinesCleared() {
+        return linesCleared;
+    }
+
+    public long getGameStartTime() {
+        return gameStartTime;
+    }
+
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public int getFallSpeed() {
+        return fallSpeed;
     }
 
     @Override
@@ -218,8 +248,17 @@ public class SimpleBoard implements Board {
     public ClearRow clearRows() {
         ClearRow clearRow = MatrixOperations.checkRemoving(currentGameMatrix);
         currentGameMatrix = clearRow.getNewMatrix();
-        return clearRow;
 
+        // Track lines cleared for game modes
+        linesCleared += clearRow.getLinesRemoved();
+
+        // PITFALL: Increase level every 10 lines
+        if (gameMode == GameMode.PITFALL && linesCleared / 10 > currentLevel - 1) {
+            currentLevel = linesCleared / 10 + 1;
+            fallSpeed = Math.max(100, 400 - (currentLevel - 1) * 30); // Speed up
+        }
+
+        return clearRow;
     }
 
     @Override
@@ -234,6 +273,13 @@ public class SimpleBoard implements Board {
         score.reset();
         // Resets the hold brick function
         heldBrick = null;
+
+        // Reset game mode variables
+        linesCleared = 0;
+        gameStartTime = System.currentTimeMillis();
+        currentLevel = 1;
+        fallSpeed = 400;
+
         createNewBrick();
     }
 }

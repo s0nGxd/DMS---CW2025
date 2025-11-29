@@ -6,8 +6,19 @@ public class GameController implements InputEventListener {
 
     private final GuiController viewGuiController;
 
-    public GameController(GuiController c) {
+    private SimpleBoard simpleBoard;
+
+    // Get methods from simple board
+    public SimpleBoard getSimpleBoard() {
+        return simpleBoard;
+    }
+
+    public GameController(GuiController c, GameMode mode) {
         viewGuiController = c;
+        if (board instanceof SimpleBoard) {
+            simpleBoard = (SimpleBoard) board;
+            simpleBoard.setGameMode(mode);
+        }
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
@@ -24,6 +35,13 @@ public class GameController implements InputEventListener {
             if (clearRow.getLinesRemoved() > 0) {
                 board.getScore().add(clearRow.getScoreBonus());
             }
+
+            // Check win conditions
+            if (checkGameModeConditions()) {
+                viewGuiController.gameWon();
+                return new DownData(clearRow, board.getViewData());
+            }
+
             if (board.createNewBrick()) {
                 viewGuiController.gameOver();
             }
@@ -35,7 +53,29 @@ public class GameController implements InputEventListener {
                 board.getScore().add(1);
             }
         }
+
+        // Check time limit for BLITZ
+        if (board.getGameMode() == GameMode.BLITZ) {
+            long elapsed = System.currentTimeMillis() - board.getGameStartTime();
+            if (elapsed >= 180000) { // 3 minutes
+                viewGuiController.gameOver();
+            }
+        }
+
         return new DownData(clearRow, board.getViewData());
+    }
+
+    private boolean checkGameModeConditions() {
+        SimpleBoard simpleBoard = (SimpleBoard) board;
+        switch (simpleBoard.getGameMode()) {
+            case SPRINT:
+                return simpleBoard.getLinesCleared() >= 40;
+            case BLITZ:
+                long elapsed = System.currentTimeMillis() - simpleBoard.getGameStartTime();
+                return elapsed >= 180000; // 3 minutes
+            default:
+                return false;
+        }
     }
 
     @Override
