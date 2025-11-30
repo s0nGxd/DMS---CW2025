@@ -20,9 +20,9 @@ final class JBrick implements Brick {
 
         // State 1: 90 degree
         brickMatrix.add(new int[][]{
+                {0, 0, 2, 2},
                 {0, 0, 2, 0},
                 {0, 0, 2, 0},
-                {0, 2, 2, 0},
                 {0, 0, 0, 0}
         });
 
@@ -36,9 +36,9 @@ final class JBrick implements Brick {
 
         // State 3: 270 degree
         brickMatrix.add(new int[][]{
-                {0, 0, 2, 2},
                 {0, 0, 2, 0},
                 {0, 0, 2, 0},
+                {0, 2, 2, 0},
                 {0, 0, 0, 0}
         });
     }
