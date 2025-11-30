@@ -13,8 +13,12 @@ public class StageManager {
     private Stage primaryStage;
     private double lastWidth = 600;
     private double lastHeight = 750;
-    private boolean wasMaximized = false;
-    private boolean wasFullscreen = false;
+
+    private boolean isInGame = false;
+
+    public void setInGame(boolean inGame) {
+        this.isInGame = inGame;
+    }
 
     private StageManager() {}
 
@@ -27,33 +31,39 @@ public class StageManager {
 
     public void setPrimaryStage(Stage stage) {
         this.primaryStage = stage;
+        this.primaryStage.setFullScreenExitHint("");  // ADD THIS - Disables ESC to exit fullscreen
+        this.primaryStage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);  // ADD THIS
         setupStageListeners();
     }
 
     private void setupStageListeners() {
-        // Track scene dimensions instead of window dimensions
         primaryStage.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
-                newScene.widthProperty().addListener((o, oldVal, newVal) -> {
-                    if (!primaryStage.isMaximized() && !primaryStage.isFullScreen()) {
-                        lastWidth = newVal.doubleValue();
+                newScene.setOnKeyPressed(event -> {
+                    if (event.getCode() == javafx.scene.input.KeyCode.F11) {
+                        toggleFullscreen();
+                        event.consume();
                     }
-                });
+                    if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                        if (isInGame) {
+                            // During game: go to menu, stay fullscreen
+                            setInGame(false);
+                            switchScene("mainMenu.fxml", controller -> {
+                                MainMenuController menuController = (MainMenuController) controller;
+                                menuController.setStage(primaryStage);
+                            });
+                            event.consume();
 
-                newScene.heightProperty().addListener((o, oldVal, newVal) -> {
-                    if (!primaryStage.isMaximized() && !primaryStage.isFullScreen()) {
-                        lastHeight = newVal.doubleValue();
+                        } else if (primaryStage.isFullScreen()){
+                            // In menu: exit fullscreen manually
+                            primaryStage.setFullScreen(false);
+                            primaryStage.setWidth(lastWidth);
+                            primaryStage.setHeight(lastHeight);
+                            event.consume();
+                        }
                     }
                 });
             }
-        });
-
-        primaryStage.maximizedProperty().addListener((obs, oldVal, newVal) -> {
-            wasMaximized = newVal;
-        });
-
-        primaryStage.fullScreenProperty().addListener((obs, oldVal, newVal) -> {
-            wasFullscreen = newVal;
         });
     }
 
@@ -95,7 +105,17 @@ public class StageManager {
 
     public void toggleFullscreen() {
         if (primaryStage != null) {
-            primaryStage.setFullScreen(!primaryStage.isFullScreen());
+            if (primaryStage.isFullScreen()) {
+                // Exiting fullscreen - restore dimensions
+                primaryStage.setFullScreen(false);
+                primaryStage.setWidth(lastWidth);
+                primaryStage.setHeight(lastHeight);
+            } else {
+                // Entering fullscreen
+                lastWidth = primaryStage.getWidth();
+                lastHeight = primaryStage.getHeight();
+                primaryStage.setFullScreen(true);
+            }
         }
     }
 
