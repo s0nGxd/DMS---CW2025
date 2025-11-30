@@ -36,7 +36,7 @@ public class GuiController implements Initializable {
 
     private StageManager stageManager;
 
-    private GameMode currentGameMode = GameMode.ZEN; // Default mode
+    private GameMode currentGameMode = null; // Default mode
     private Stage mainStage;
     private MainMenuController mainMenuController;
 
@@ -253,12 +253,6 @@ public class GuiController implements Initializable {
         centerNoti();
     }
 
-    private void toggleFullScreen() {
-        if (stageManager != null) {
-            stageManager.toggleFullscreen();
-        }
-    }
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), 38);
@@ -271,13 +265,6 @@ public class GuiController implements Initializable {
                 //ESCAPE KEY
                 if (keyEvent.getCode() == KeyCode.ESCAPE) {
                     returnToMainMenu();
-                    keyEvent.consume();
-                    return;
-                }
-
-                // F11 FOR FULLSCREEN
-                if (keyEvent.getCode() == KeyCode.F11) {
-                    toggleFullScreen();
                     keyEvent.consume();
                     return;
                 }
@@ -761,10 +748,10 @@ public class GuiController implements Initializable {
         groupNotification.getChildren().clear();
         groupNotification.getChildren().add(completePanel);
 
+        isGameOver.setValue(Boolean.TRUE);
+
         // Center the notification
         Platform.runLater(() -> centerNoti());
-
-        isGameOver.setValue(Boolean.TRUE);
     }
 
     public void newGame(ActionEvent actionEvent) {

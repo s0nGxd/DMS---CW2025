@@ -17,17 +17,15 @@ public class Main extends Application {
         StageManager stageManager = StageManager.getInstance();
         stageManager.setPrimaryStage(primaryStage);
 
-        // Load main menu
-        URL location = getClass().getClassLoader().getResource("mainMenu.fxml");
-        FXMLLoader fxmlLoader = new FXMLLoader(location);
-        Parent root = fxmlLoader.load();
-        MainMenuController controller = fxmlLoader.getController();
-
         primaryStage.setTitle("TetrisJFX");
-        Scene scene = new Scene(root, 600, 750);
-        primaryStage.setScene(scene);
+
+        // Use StageManager for initial scene
+        stageManager.switchScene("mainMenu.fxml", controller -> {
+            MainMenuController menuController = (MainMenuController) controller;
+            menuController.setStage(primaryStage);
+        });
+
         primaryStage.show();
-        controller.setStage(primaryStage);
     }
 
 
