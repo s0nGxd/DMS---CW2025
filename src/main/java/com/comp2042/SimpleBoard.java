@@ -26,6 +26,8 @@ public class SimpleBoard implements Board {
     private int currentLevel = 1;  // For PITFALL
     private int fallSpeed = 400;  // For PITFALL (milliseconds)
 
+    private long completionTime = 0;
+
     public SimpleBoard(int width, int height) {
         this.width = width;
         this.height = height;
@@ -33,6 +35,7 @@ public class SimpleBoard implements Board {
         brickGenerator = new RandomBrickGenerator();
         brickRotator = new BrickRotator();
         score = new Score();
+        gameStartTime = System.currentTimeMillis();
     }
 
     public void setGameMode(GameMode mode) {
@@ -186,6 +189,11 @@ public class SimpleBoard implements Board {
         // Reset hold flag when new brick spawns
         heldThisTurn = false;
 
+        // Initialize game start time on first brick
+        if (gameStartTime == 0) {
+            gameStartTime = System.currentTimeMillis();
+        }
+
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
     }
 
@@ -266,6 +274,14 @@ public class SimpleBoard implements Board {
         return score;
     }
 
+    public long getCompletionTime() {
+        return completionTime;
+    }
+
+    public void setCompletionTime(long time) {
+        this.completionTime = time;
+    }
+
 
     @Override
     public void newGame() {
@@ -276,7 +292,7 @@ public class SimpleBoard implements Board {
 
         // Reset game mode variables
         linesCleared = 0;
-        gameStartTime = System.currentTimeMillis();
+        gameStartTime = 0;
         currentLevel = 1;
         fallSpeed = 400;
 

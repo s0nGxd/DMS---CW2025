@@ -3,26 +3,35 @@ package com.comp2042;
 public class GameController implements InputEventListener {
 
     private Board board = new SimpleBoard(25, 10);
-
-    private final GuiController viewGuiController;
-
     private SimpleBoard simpleBoard;
 
-    // Get methods from simple board
-    public SimpleBoard getSimpleBoard() {
-        return simpleBoard;
-    }
+    private final GuiController viewGuiController;
+    private final HighScoreManager highScoreManager;
 
     public GameController(GuiController c, GameMode mode) {
         viewGuiController = c;
+        highScoreManager = HighScoreManager.getInstance();
+
         if (board instanceof SimpleBoard) {
             simpleBoard = (SimpleBoard) board;
             simpleBoard.setGameMode(mode);
         }
+
         board.createNewBrick();
         viewGuiController.setEventListener(this);
         viewGuiController.initGameView(board.getBoardMatrix(), board.getViewData());
         viewGuiController.bindScore(board.getScore().scoreProperty());
+
+        // Display current high scores
+        viewGuiController.displayHighScores(mode, highScoreManager);
+    }
+
+    public SimpleBoard getSimpleBoard() {
+        return simpleBoard;
+    }
+
+    public HighScoreManager getHighScoreManager() {
+        return highScoreManager;
     }
 
     @Override
@@ -36,18 +45,15 @@ public class GameController implements InputEventListener {
                 board.getScore().add(clearRow.getScoreBonus());
             }
 
-            // Check win conditions
-            if (checkGameModeConditions()) {
-                viewGuiController.gameWon();
-                return new DownData(clearRow, board.getViewData());
+            // Check game mode completion
+            if (simpleBoard != null) {
+                checkGameModeCompletion();
             }
 
             if (board.createNewBrick()) {
-                viewGuiController.gameOver();
+                handleGameOver();
             }
-
             viewGuiController.refreshGameBackground(board.getBoardMatrix());
-
         } else {
             if (event.getEventSource() == EventSource.USER) {
                 board.getScore().add(1);
@@ -55,26 +61,77 @@ public class GameController implements InputEventListener {
         }
 
         // Check time limit for BLITZ
-        if (board.getGameMode() == GameMode.BLITZ) {
-            long elapsed = System.currentTimeMillis() - board.getGameStartTime();
-            if (elapsed >= 180000) { // 3 minutes
-                viewGuiController.gameOver();
+        if (simpleBoard != null && simpleBoard.getGameMode() == GameMode.BLITZ) {
+            long startTime = simpleBoard.getGameStartTime();
+            if (startTime > 0) {  // Only check if game has actually started
+                long elapsed = System.currentTimeMillis() - startTime;
+                if (elapsed >= 180000) { // 3 minutes
+                    endBlitzMode();
+                }
             }
         }
 
         return new DownData(clearRow, board.getViewData());
     }
 
-    private boolean checkGameModeConditions() {
-        SimpleBoard simpleBoard = (SimpleBoard) board;
+    private void checkGameModeCompletion() {
+        if (simpleBoard == null) return;
+
         switch (simpleBoard.getGameMode()) {
             case SPRINT:
-                return simpleBoard.getLinesCleared() >= 40;
-            case BLITZ:
-                long elapsed = System.currentTimeMillis() - simpleBoard.getGameStartTime();
-                return elapsed >= 180000; // 3 minutes
-            default:
-                return false;
+                if (simpleBoard.getLinesCleared() >= 40) {
+                    endSprintMode();
+                }
+                break;
+            case PITFALL:
+                // Pitfall ends on game over, check high scores then
+                break;
+        }
+    }
+
+    private void endSprintMode() {
+        long completionTime = System.currentTimeMillis() - simpleBoard.getGameStartTime();
+        simpleBoard.setCompletionTime(completionTime);
+
+        boolean isNewRecord = highScoreManager.isSprintNewRecord(completionTime);
+        if (isNewRecord) {
+            highScoreManager.setSprintBestTime(completionTime);
+        }
+
+        viewGuiController.showSprintComplete(completionTime, isNewRecord, highScoreManager);
+    }
+
+    private void endBlitzMode() {
+        int finalScore = board.getScore().scoreProperty().get();
+
+        boolean isNewRecord = highScoreManager.isBlitzNewRecord(finalScore);
+        if (isNewRecord) {
+            highScoreManager.setBlitzHighScore(finalScore);
+        }
+
+        viewGuiController.showBlitzComplete(finalScore, isNewRecord, highScoreManager);
+    }
+
+    private void handleGameOver() {
+        // Check for Pitfall high scores on game over
+        if (simpleBoard != null && simpleBoard.getGameMode() == GameMode.PITFALL) {
+            int finalScore = simpleBoard.getScore().scoreProperty().get();
+            int finalLevel = simpleBoard.getCurrentLevel();
+
+            boolean newLevelRecord = highScoreManager.isPitfallNewLevelRecord(finalLevel);
+            boolean newScoreRecord = highScoreManager.isPitfallNewScoreRecord(finalScore);
+
+            if (newLevelRecord) {
+                highScoreManager.setPitfallHighLevel(finalLevel);
+            }
+            if (newScoreRecord) {
+                highScoreManager.setPitfallHighScore(finalScore);
+            }
+
+            viewGuiController.showPitfallGameOver(finalLevel, finalScore,
+                    newLevelRecord || newScoreRecord, highScoreManager);
+        } else {
+            viewGuiController.gameOver();
         }
     }
 
@@ -84,20 +141,26 @@ public class GameController implements InputEventListener {
         while(board.moveBrickDown()){
             // Loop to Keep Dropping until the Bottom
         }
-            board.mergeBrickToBackground();
-            clearRow = board.clearRows();
-            if (clearRow.getLinesRemoved() > 0) {
-                board.getScore().add(clearRow.getScoreBonus());
-            }
-            if (board.createNewBrick()) {
-                viewGuiController.gameOver();
-            }
+        board.mergeBrickToBackground();
+        clearRow = board.clearRows();
+        if (clearRow.getLinesRemoved() > 0) {
+            board.getScore().add(clearRow.getScoreBonus());
+        }
 
-            viewGuiController.refreshGameBackground(board.getBoardMatrix());
+        // Check game mode completion
+        if (simpleBoard != null) {
+            checkGameModeCompletion();
+        }
 
-            if (event.getEventSource() == EventSource.USER) {
-                board.getScore().add(1);
-            }
+        if (board.createNewBrick()) {
+            handleGameOver();
+        }
+
+        viewGuiController.refreshGameBackground(board.getBoardMatrix());
+
+        if (event.getEventSource() == EventSource.USER) {
+            board.getScore().add(1);
+        }
         return new DownData(clearRow, board.getViewData());
     }
 

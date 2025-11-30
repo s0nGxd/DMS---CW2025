@@ -79,6 +79,9 @@ public class GuiController implements Initializable {
     @FXML
     private Label progressLabel; // For SPRINT/PITFALL progress
 
+    @FXML
+    private Label highScoreLabel;
+
     private Rectangle[][] displayMatrix;
 
     private InputEventListener eventListener;
@@ -137,15 +140,25 @@ public class GuiController implements Initializable {
     }
 
     private void returnToMainMenu() {
+        // Stop the timeline
         if (timeLine != null) {
             timeLine.stop();
+            timeLine = null;
         }
-        if (stageManager != null) {
-            stageManager.switchScene("mainMenu.fxml", controller -> {
-                MainMenuController menuController = (MainMenuController) controller;
-                menuController.setStage(stageManager.getPrimaryStage());
-            });
-        }
+
+        // Reset game state
+        isPause.setValue(Boolean.FALSE);
+        isGameOver.setValue(Boolean.FALSE);
+
+        // Clear event listener
+        eventListener = null;
+
+        // Return to main menu using StageManager
+        StageManager stageManager = StageManager.getInstance();
+        stageManager.switchScene("mainMenu.fxml", controller -> {
+            MainMenuController menuController = (MainMenuController) controller;
+            menuController.setStage(stageManager.getPrimaryStage());
+        });
     }
 
     private void centerNoti() {
@@ -254,6 +267,29 @@ public class GuiController implements Initializable {
         gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
+                // KEYS THAT NEEDS TO WORK OUTSIDE GAMEPLAY
+                //ESCAPE KEY
+                if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                    returnToMainMenu();
+                    keyEvent.consume();
+                    return;
+                }
+
+                // F11 FOR FULLSCREEN
+                if (keyEvent.getCode() == KeyCode.F11) {
+                    toggleFullScreen();
+                    keyEvent.consume();
+                    return;
+                }
+
+                // N KEY FOR NEW GAME
+                if (keyEvent.getCode() == KeyCode.N) {
+                    newGame(null);
+                    keyEvent.consume();
+                    return;
+                }
+
+                // KEYS THAT ONLY WORK DURING GAMEPLAY
                 if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
                     if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
                         refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
@@ -293,15 +329,6 @@ public class GuiController implements Initializable {
                         returnToMainMenu();
                         keyEvent.consume();
                     }
-                }
-
-                if (keyEvent.getCode() == KeyCode.F11) {
-                    toggleFullScreen();
-                    keyEvent.consume();
-                }
-
-                if (keyEvent.getCode() == KeyCode.N) {
-                    newGame(null);
                 }
             }
         });
@@ -636,7 +663,112 @@ public class GuiController implements Initializable {
         isGameOver.setValue(Boolean.TRUE);
     }
 
+    public void displayHighScores(GameMode mode, HighScoreManager manager) {
+        if (progressLabel == null) return;
+
+        String highScoreText = "";
+        switch (mode) {
+            case SPRINT:
+                long bestTime = manager.getSprintBestTime();
+                if (bestTime < 999999999) {
+                    highScoreText = "Best: " + HighScoreManager.formatTime(bestTime);
+                } else {
+                    highScoreText = "Best: --:--";
+                }
+                break;
+            case BLITZ:
+                int blitzHigh = manager.getBlitzHighScore();
+                highScoreText = "High: " + blitzHigh;
+                break;
+            case PITFALL:
+                int pitfallLevel = manager.getPitfallHighLevel();
+                int pitfallScore = manager.getPitfallHighScore();
+                highScoreText = "Best: Lv." + pitfallLevel + " / " + pitfallScore;
+                break;
+            case ZEN:
+                highScoreText = "Zen Mode";
+                break;
+        }
+
+        // Display on the progress label initially
+        final String scoreText = highScoreText;
+        javafx.application.Platform.runLater(() -> {
+            if (progressLabel != null) {
+                String currentText = progressLabel.getText();
+                if (currentText == null || currentText.isEmpty() || currentText.equals("Zen Mode")) {
+                    progressLabel.setText(scoreText);
+                }
+            }
+        });
+    }
+
+    public void showSprintComplete(long completionTime, boolean isNewRecord, HighScoreManager manager) {
+        timeLine.stop();
+
+        String timeStr = HighScoreManager.formatTime(completionTime);
+        String message = "40 LINES CLEARED!\n" + timeStr;
+        if (isNewRecord) {
+            message += "\n✨ NEW RECORD! ✨";
+        } else {
+            long bestTime = manager.getSprintBestTime();
+            message += "\nBest: " + HighScoreManager.formatTime(bestTime);
+        }
+
+        showCompletionMessage(message, isNewRecord);
+    }
+
+    public void showBlitzComplete(int finalScore, boolean isNewRecord, HighScoreManager manager) {
+        timeLine.stop();
+
+        String message = "TIME'S UP!\nScore: " + finalScore;
+        if (isNewRecord) {
+            message += "\n✨ NEW RECORD! ✨";
+        } else {
+            int highScore = manager.getBlitzHighScore();
+            message += "\nHigh Score: " + highScore;
+        }
+
+        showCompletionMessage(message, isNewRecord);
+    }
+
+    public void showPitfallGameOver(int finalLevel, int finalScore, boolean isNewRecord, HighScoreManager manager) {
+        timeLine.stop();
+
+        String message = "GAME OVER\nLevel " + finalLevel + "\nScore: " + finalScore;
+        if (isNewRecord) {
+            message += "\n✨ NEW RECORD! ✨";
+        } else {
+            int highLevel = manager.getPitfallHighLevel();
+            int highScore = manager.getPitfallHighScore();
+            message += "\nBest: Lv." + highLevel + " / " + highScore;
+        }
+
+        showCompletionMessage(message, isNewRecord);
+    }
+
+    private void showCompletionMessage(String message, boolean isNewRecord) {
+        Label completeLabel = new Label(message);
+        completeLabel.getStyleClass().add(isNewRecord ? "newRecordStyle" : "gameCompleteStyle");
+        completeLabel.setStyle("-fx-text-alignment: center; -fx-wrap-text: true;");
+        completeLabel.setMaxWidth(400);
+
+        BorderPane completePanel = new BorderPane();
+        completePanel.setCenter(completeLabel);
+        completePanel.setVisible(true);
+        completePanel.setMaxWidth(450);
+        completePanel.setMaxHeight(300);
+
+        groupNotification.getChildren().clear();
+        groupNotification.getChildren().add(completePanel);
+
+        // Center the notification
+        Platform.runLater(() -> centerNoti());
+
+        isGameOver.setValue(Boolean.TRUE);
+    }
+
     public void newGame(ActionEvent actionEvent) {
+        groupNotification.getChildren().clear();
         timeLine.stop();
         gameOverPanel.setVisible(false);
         eventListener.createNewGame();
