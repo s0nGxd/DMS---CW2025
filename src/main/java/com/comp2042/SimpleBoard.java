@@ -20,6 +20,14 @@ public class SimpleBoard implements Board {
     private Brick heldBrick = null;
     private boolean heldThisTurn = false;
 
+    private GameMode gameMode = GameMode.ZEN;
+    private int linesCleared = 0;  // For SPRINT
+    private long gameStartTime = 0;  // For BLITZ
+    private int currentLevel = 1;  // For PITFALL
+    private int fallSpeed = 400;  // For PITFALL (milliseconds)
+
+    private long completionTime = 0;
+
     public SimpleBoard(int width, int height) {
         this.width = width;
         this.height = height;
@@ -27,6 +35,31 @@ public class SimpleBoard implements Board {
         brickGenerator = new RandomBrickGenerator();
         brickRotator = new BrickRotator();
         score = new Score();
+        gameStartTime = System.currentTimeMillis();
+    }
+
+    public void setGameMode(GameMode mode) {
+        this.gameMode = mode;
+    }
+
+    public GameMode getGameMode() {
+        return gameMode;
+    }
+
+    public int getLinesCleared() {
+        return linesCleared;
+    }
+
+    public long getGameStartTime() {
+        return gameStartTime;
+    }
+
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public int getFallSpeed() {
+        return fallSpeed;
     }
 
     @Override
@@ -156,6 +189,11 @@ public class SimpleBoard implements Board {
         // Reset hold flag when new brick spawns
         heldThisTurn = false;
 
+        // Initialize game start time on first brick
+        if (gameStartTime == 0) {
+            gameStartTime = System.currentTimeMillis();
+        }
+
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
     }
 
@@ -218,13 +256,30 @@ public class SimpleBoard implements Board {
     public ClearRow clearRows() {
         ClearRow clearRow = MatrixOperations.checkRemoving(currentGameMatrix);
         currentGameMatrix = clearRow.getNewMatrix();
-        return clearRow;
 
+        // Track lines cleared for game modes
+        linesCleared += clearRow.getLinesRemoved();
+
+        // PITFALL: Increase level every 10 lines
+        if (gameMode == GameMode.PITFALL && linesCleared / 10 > currentLevel - 1) {
+            currentLevel = linesCleared / 10 + 1;
+            fallSpeed = Math.max(100, 400 - (currentLevel - 1) * 30); // Speed up
+        }
+
+        return clearRow;
     }
 
     @Override
     public Score getScore() {
         return score;
+    }
+
+    public long getCompletionTime() {
+        return completionTime;
+    }
+
+    public void setCompletionTime(long time) {
+        this.completionTime = time;
     }
 
 
@@ -234,6 +289,13 @@ public class SimpleBoard implements Board {
         score.reset();
         // Resets the hold brick function
         heldBrick = null;
+
+        // Reset game mode variables
+        linesCleared = 0;
+        gameStartTime = 0;
+        currentLevel = 1;
+        fallSpeed = 400;
+
         createNewBrick();
     }
 }

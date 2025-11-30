@@ -7,32 +7,79 @@
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
 <Pane fx:controller="com.comp2042.GuiController"
-      xmlns:fx="http://javafx.com/fxml">
-    <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
+      xmlns:fx="http://javafx.com/fxml"
+      styleClass="root">
 
-    <!-- Added Hold Brick Panel -->
-    <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick">
+    <!-- Title and Score Header -->
+    <HBox fx:id="headerArea" styleClass="header-area" alignment="CENTER" spacing="20" prefHeight="60">
+        <Label text="TetrisJFX" styleClass="game-title"/>
+        <VBox alignment="CENTER_RIGHT" styleClass="score-container">
+            <Label text="SCORE" styleClass="score-label"/>
+            <Label fx:id="scoreValue" text="0" styleClass="score-value"/>
+            <Label fx:id="progressLabel" text="" styleClass="score-label"/>
+        </VBox>
+    </HBox>
+
+    <!-- Game board (background) -->
+    <BorderPane styleClass="gameBoard" fx:id="gameBoard" prefWidth="200" prefHeight="400">
+        <center>
+            <GridPane fx:id="gamePanel" hgap="1" vgap="1"/>
+        </center>
+    </BorderPane>
+
+    <!-- Hold panel -->
+    <VBox fx:id="heldBrickBox" spacing="5" styleClass="nextBrick" prefWidth="100" prefHeight="120">
         <Label text="HOLD" styleClass="nextBrickLabel"/>
         <GridPane fx:id="holdBrickPanel" vgap="1" hgap="1" prefWidth="80" prefHeight="80"/>
     </VBox>
 
-    <!-- Added Next Bricks Panel -->
-    <VBox fx:id="nextBricksBox" spacing="10" styleClass="nextBrick">
+    <!-- Next pieces panel -->
+    <VBox fx:id="nextBricksBox" spacing="10" styleClass="nextBrick" prefWidth="100" prefHeight="120">
         <Label text="NEXT" styleClass="nextBrickLabel"/>
         <VBox fx:id="nextBricksPanel" spacing="8" prefWidth="80"/>
     </VBox>
 
-    <BorderPane styleClass="gameBoard" fx:id="gameBoard">
-        <center>
-            <GridPane fx:id="gamePanel" hgap="1" vgap="1" layoutY="30" layoutX="40"/>
-        </center>
-    </BorderPane>
+    <!-- Footer with controls -->
+    <VBox fx:id="footerArea" styleClass="footer-area" alignment="CENTER" spacing="8" prefHeight="80">
+        <Label text="CONTROLS" styleClass="controls-title"/>
+        <HBox styleClass="controls-container" spacing="12" alignment="CENTER">
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="← →" styleClass="control-key"/>
+                <Label text="MOVE" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="Z/↑" styleClass="control-key"/>
+                <Label text="ROTATE" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="↓" styleClass="control-key"/>
+                <Label text="SOFT DROP" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="SPACE" styleClass="control-key"/>
+                <Label text="HARD DROP" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="C" styleClass="control-key"/>
+                <Label text="HOLD" styleClass="control-description"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="N" styleClass="control-key"/>
+                <Label text="NEW GAME" styleClass="control-description"/>
+            </VBox>
+        </HBox>
+    </VBox>
 
-    <Group fx:id="groupNotification" layoutX="14" layoutY="203">
+    <!-- Brick panel (On Top of GamePanel) -->
+    <GridPane fx:id="brickPanel" vgap="1" hgap="1"/>
+
+    <!-- Notifications (Most Top) -->
+    <Group fx:id="groupNotification">
         <VBox alignment="CENTER">
             <GameOverPanel fx:id="gameOverPanel"/>
         </VBox>
     </Group>
+
     <stylesheets>
         <URL value="@window_style.css"/>
     </stylesheets>

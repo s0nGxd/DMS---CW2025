@@ -11,11 +11,13 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.effect.Reflection;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -31,6 +33,12 @@ import java.util.ResourceBundle;
 public class GuiController implements Initializable {
 
     private static final int BRICK_SIZE = 20;
+
+    private StageManager stageManager;
+
+    private GameMode currentGameMode = GameMode.ZEN; // Default mode
+    private Stage mainStage;
+    private MainMenuController mainMenuController;
 
     @FXML
     private GridPane gamePanel;
@@ -56,6 +64,24 @@ public class GuiController implements Initializable {
     @FXML
     private VBox nextBricksBox;
 
+    @FXML
+    private VBox footerArea;
+
+    @FXML
+    private Label scoreValue;
+
+    @FXML
+    private HBox headerArea;
+
+    @FXML
+    private Label gameModeLabel;
+
+    @FXML
+    private Label progressLabel; // For SPRINT/PITFALL progress
+
+    @FXML
+    private Label highScoreLabel;
+
     private Rectangle[][] displayMatrix;
 
     private InputEventListener eventListener;
@@ -71,6 +97,10 @@ public class GuiController implements Initializable {
     private final BooleanProperty isPause = new SimpleBooleanProperty();
 
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
+
+    public void setStageManager(StageManager stageManager) {
+        this.stageManager = stageManager;
+    }
 
     public void setStage(Stage stage){
         this.stage = stage;
@@ -94,6 +124,42 @@ public class GuiController implements Initializable {
         // Center immediately when stage is first set
         Platform.runLater(this::updateLayout);
     }
+    
+    public void setGameMode(GameMode mode) {
+        this.currentGameMode = mode;
+        // Used to configure game modes
+    }
+
+    public GameMode getCurrentGameMode() {
+        return currentGameMode;
+    }
+
+    public void setMainMenuStage(Stage stage, MainMenuController menuController) {
+        this.mainStage = stage;
+        this.mainMenuController = menuController;
+    }
+
+    private void returnToMainMenu() {
+        // Stop the timeline
+        if (timeLine != null) {
+            timeLine.stop();
+            timeLine = null;
+        }
+
+        // Reset game state
+        isPause.setValue(Boolean.FALSE);
+        isGameOver.setValue(Boolean.FALSE);
+
+        // Clear event listener
+        eventListener = null;
+
+        // Return to main menu using StageManager
+        StageManager stageManager = StageManager.getInstance();
+        stageManager.switchScene("mainMenu.fxml", controller -> {
+            MainMenuController menuController = (MainMenuController) controller;
+            menuController.setStage(stageManager.getPrimaryStage());
+        });
+    }
 
     private void centerNoti() {
         double centerX = gameBoard.getLayoutX() + (gameBoard.getWidth() / 2);
@@ -108,39 +174,88 @@ public class GuiController implements Initializable {
     }
 
     private void updateLayout() {
-        // Center the Gameboard
-        double gameBoardX = ((stage.getWidth() - gameBoard.getWidth()) / 2);
-        double gameBoardY = ((stage.getHeight() - gameBoard.getHeight()) / 2);
+        if (stage == null) return;
+
+        // Get window dimensions
+        double windowWidth = stage.getWidth();
+        double windowHeight = stage.getHeight();
+
+        // Calculated total width of game area (side panels + game panel + spacing)
+        double heldBrickWidth = heldBrickBox != null ? heldBrickBox.getWidth() : 100;
+        double gamePanelWidth = gamePanel.getWidth();
+        double nextBrickWidth = nextBricksBox != null ? nextBricksBox.getWidth() : 100;
+        double sideSpacing = 20;
+        double totalWidth = heldBrickWidth + gamePanelWidth + nextBrickWidth + (2 * sideSpacing);
+
+        // Calculated total height of all elements (header + game panel + footer + spacing)
+        double headerHeight = headerArea != null ? headerArea.getHeight() : 60;
+        double gamePanelHeight = gamePanel.getHeight();
+        double footerHeight = footerArea != null ? footerArea.getHeight() : 80;
+        double verticalSpacing = 20;
+        double totalHeight = headerHeight + gamePanelHeight + footerHeight + (2 * verticalSpacing);
+
+        // Calculate starting positions to center everything
+        double startX = (windowWidth - totalWidth) / 2;
+        double startY = (windowHeight - totalHeight) / 2;
+
+        // Position header at the top
+        if (headerArea != null) {
+            double headerX = startX + (totalWidth - headerArea.getWidth()) / 2;
+            double headerY = startY;
+            headerArea.setLayoutX(headerX);
+            headerArea.setLayoutY(headerY);
+        }
+
+        // Position game board below header
+        double gameBoardY = startY + headerHeight + verticalSpacing;
+        double gameBoardX = startX + heldBrickWidth + sideSpacing;
         gameBoard.setLayoutX(gameBoardX);
         gameBoard.setLayoutY(gameBoardY);
 
-        // Position held brick panel to the left of gamePanel
-        double gamePanelX = gameBoardX + gamePanel.getLayoutX();
-        double gamePanelY = gameBoardY + gamePanel.getLayoutY();
+        // Position held brick panel to the left of game panel
+        if (heldBrickBox != null) {
+            double holdBoxX = startX;
+            double holdBoxY = gameBoardY + (gamePanelHeight - heldBrickBox.getHeight()) / 2;
+            heldBrickBox.setLayoutX(holdBoxX);
+            heldBrickBox.setLayoutY(holdBoxY);
+        }
 
-        double holdBoxX = gamePanelX - 100; // 100px left of game panel
-        double holdBoxY = gamePanelY + 50; // Slightly below top of game panel
-        heldBrickBox.setLayoutX(holdBoxX);
-        heldBrickBox.setLayoutY(holdBoxY);
+        // Position next bricks panel to the right of game panel
+        if (nextBricksBox != null) {
+            double nextBoxX = startX + heldBrickWidth + gamePanelWidth + (2 * sideSpacing);
+            double nextBoxY = gameBoardY + (gamePanelHeight - nextBricksBox.getHeight()) / 2;
+            nextBricksBox.setLayoutX(nextBoxX);
+            nextBricksBox.setLayoutY(nextBoxY);
+        }
 
-        // Position next bricks panel to the right of gamePanel
-        double nextBoxX = gamePanelX + gamePanel.getWidth() + 20;
-        double nextBoxY = gamePanelY + 50; // Same height as held brick panel
-        nextBricksBox.setLayoutX(nextBoxX);
-        nextBricksBox.setLayoutY(nextBoxY);
+        // Position footer below game panel
+        if (footerArea != null) {
+            double footerX = startX + (totalWidth - footerArea.getWidth()) / 2;
+            double footerY = startY + headerHeight + gamePanelHeight + (2 * verticalSpacing);
+            footerArea.setLayoutX(footerX);
+            footerArea.setLayoutY(footerY);
+        }
 
-        // Update brick position to match new gameBoard position
+        // Position active brick panel to match game board
+        if (brickPanel != null) {
+            brickPanel.setLayoutX(gameBoard.getLayoutX());
+            brickPanel.setLayoutY(gameBoard.getLayoutY());
+        }
+
+        // Update brick position
         if (eventListener != null) {
             ViewData currentViewData = eventListener.getCurrentViewData();
-                    refreshBrick(currentViewData);
+            if (currentViewData != null) {
+                refreshBrick(currentViewData);
+            }
         }
 
         centerNoti();
     }
 
     private void toggleFullScreen() {
-        if (stage != null) {
-            stage.setFullScreen(!stage.isFullScreen());
+        if (stageManager != null) {
+            stageManager.toggleFullscreen();
         }
     }
 
@@ -152,6 +267,29 @@ public class GuiController implements Initializable {
         gamePanel.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
+                // KEYS THAT NEEDS TO WORK OUTSIDE GAMEPLAY
+                //ESCAPE KEY
+                if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                    returnToMainMenu();
+                    keyEvent.consume();
+                    return;
+                }
+
+                // F11 FOR FULLSCREEN
+                if (keyEvent.getCode() == KeyCode.F11) {
+                    toggleFullScreen();
+                    keyEvent.consume();
+                    return;
+                }
+
+                // N KEY FOR NEW GAME
+                if (keyEvent.getCode() == KeyCode.N) {
+                    newGame(null);
+                    keyEvent.consume();
+                    return;
+                }
+
+                // KEYS THAT ONLY WORK DURING GAMEPLAY
                 if (isPause.getValue() == Boolean.FALSE && isGameOver.getValue() == Boolean.FALSE) {
                     if (keyEvent.getCode() == KeyCode.LEFT || keyEvent.getCode() == KeyCode.A) {
                         refreshBrick(eventListener.onLeftEvent(new MoveEvent(EventType.LEFT, EventSource.USER)));
@@ -185,15 +323,12 @@ public class GuiController implements Initializable {
                         refreshBrick(eventListener.onHoldEvent(new MoveEvent(EventType.HOLD, EventSource.USER)));
                         keyEvent.consume();
                     }
-                }
 
-                if (keyEvent.getCode() == KeyCode.F11) {
-                    toggleFullScreen();
-                    keyEvent.consume();
-                }
-
-                if (keyEvent.getCode() == KeyCode.N) {
-                    newGame(null);
+                    // ESCAPE KEY BRINGS TO MAIN MENU
+                    if (keyEvent.getCode() == KeyCode.ESCAPE) {
+                        returnToMainMenu();
+                        keyEvent.consume();
+                    }
                 }
             }
         });
@@ -234,12 +369,75 @@ public class GuiController implements Initializable {
         initHoldBrickPanel(brick);
         initNextBricksPanel(brick);
 
+        // Get fall speed
+        int speed = 400;  // Default speed
+        if (eventListener instanceof GameController) {
+            GameController gameController = (GameController) eventListener;
+            SimpleBoard simpleBoard = gameController.getSimpleBoard();
+            if (simpleBoard != null) {
+                speed = simpleBoard.getFallSpeed();
+            }
+        }
+
         timeLine = new Timeline(new KeyFrame(
-                Duration.millis(400),
-                ae -> moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD))
+                Duration.millis(speed),
+                ae -> {
+                    moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD));
+                    updateGameModeUI();
+                }
         ));
         timeLine.setCycleCount(Timeline.INDEFINITE);
         timeLine.play();
+    }
+
+    private void updateGameModeUI() {
+        if (!(eventListener instanceof GameController)) return;
+
+        GameController gameController = (GameController) eventListener;
+        SimpleBoard simpleBoard = gameController.getSimpleBoard();
+
+        if (simpleBoard == null || progressLabel == null) return;
+
+        switch (simpleBoard.getGameMode()) {
+            case SPRINT:
+                int remaining = 40 - simpleBoard.getLinesCleared();
+                progressLabel.setText("Lines: " + remaining);
+                break;
+            case BLITZ:
+                long elapsed = System.currentTimeMillis() -
+                        simpleBoard.getGameStartTime();
+                int seconds = (int) ((180000 - elapsed) / 1000);
+                progressLabel.setText("Time: " + seconds + "s");
+                break;
+            case PITFALL:
+                progressLabel.setText("Level: " + simpleBoard.getCurrentLevel());
+                // Update speed
+                if (timeLine != null) {
+                    timeLine.setRate(400.0 / simpleBoard.getFallSpeed());
+                }
+                break;
+            case ZEN:
+                progressLabel.setText("Zen Mode");
+                break;
+        }
+    }
+
+    public void gameWon() {
+        timeLine.stop();
+
+        // Create a win message similar to game over
+        Label winLabel = new Label("YOU WIN!");
+        winLabel.getStyleClass().add("gameOverStyle");
+
+        BorderPane winPanel = new BorderPane();
+        winPanel.setCenter(winLabel);
+        winPanel.setVisible(true);
+
+        // Add to notification group
+        groupNotification.getChildren().clear();
+        groupNotification.getChildren().add(winPanel);
+
+        isGameOver.setValue(Boolean.TRUE);
     }
 
 
@@ -454,6 +652,9 @@ public class GuiController implements Initializable {
     }
 
     public void bindScore(IntegerProperty integerProperty) {
+        if (scoreValue != null && integerProperty != null) {
+            scoreValue.textProperty().bind(integerProperty.asString());
+        }
     }
 
     public void gameOver() {
@@ -462,7 +663,112 @@ public class GuiController implements Initializable {
         isGameOver.setValue(Boolean.TRUE);
     }
 
+    public void displayHighScores(GameMode mode, HighScoreManager manager) {
+        if (progressLabel == null) return;
+
+        String highScoreText = "";
+        switch (mode) {
+            case SPRINT:
+                long bestTime = manager.getSprintBestTime();
+                if (bestTime < 999999999) {
+                    highScoreText = "Best: " + HighScoreManager.formatTime(bestTime);
+                } else {
+                    highScoreText = "Best: --:--";
+                }
+                break;
+            case BLITZ:
+                int blitzHigh = manager.getBlitzHighScore();
+                highScoreText = "High: " + blitzHigh;
+                break;
+            case PITFALL:
+                int pitfallLevel = manager.getPitfallHighLevel();
+                int pitfallScore = manager.getPitfallHighScore();
+                highScoreText = "Best: Lv." + pitfallLevel + " / " + pitfallScore;
+                break;
+            case ZEN:
+                highScoreText = "Zen Mode";
+                break;
+        }
+
+        // Display on the progress label initially
+        final String scoreText = highScoreText;
+        javafx.application.Platform.runLater(() -> {
+            if (progressLabel != null) {
+                String currentText = progressLabel.getText();
+                if (currentText == null || currentText.isEmpty() || currentText.equals("Zen Mode")) {
+                    progressLabel.setText(scoreText);
+                }
+            }
+        });
+    }
+
+    public void showSprintComplete(long completionTime, boolean isNewRecord, HighScoreManager manager) {
+        timeLine.stop();
+
+        String timeStr = HighScoreManager.formatTime(completionTime);
+        String message = "40 LINES CLEARED!\n" + timeStr;
+        if (isNewRecord) {
+            message += "\n✨ NEW RECORD! ✨";
+        } else {
+            long bestTime = manager.getSprintBestTime();
+            message += "\nBest: " + HighScoreManager.formatTime(bestTime);
+        }
+
+        showCompletionMessage(message, isNewRecord);
+    }
+
+    public void showBlitzComplete(int finalScore, boolean isNewRecord, HighScoreManager manager) {
+        timeLine.stop();
+
+        String message = "TIME'S UP!\nScore: " + finalScore;
+        if (isNewRecord) {
+            message += "\n✨ NEW RECORD! ✨";
+        } else {
+            int highScore = manager.getBlitzHighScore();
+            message += "\nHigh Score: " + highScore;
+        }
+
+        showCompletionMessage(message, isNewRecord);
+    }
+
+    public void showPitfallGameOver(int finalLevel, int finalScore, boolean isNewRecord, HighScoreManager manager) {
+        timeLine.stop();
+
+        String message = "GAME OVER\nLevel " + finalLevel + "\nScore: " + finalScore;
+        if (isNewRecord) {
+            message += "\n✨ NEW RECORD! ✨";
+        } else {
+            int highLevel = manager.getPitfallHighLevel();
+            int highScore = manager.getPitfallHighScore();
+            message += "\nBest: Lv." + highLevel + " / " + highScore;
+        }
+
+        showCompletionMessage(message, isNewRecord);
+    }
+
+    private void showCompletionMessage(String message, boolean isNewRecord) {
+        Label completeLabel = new Label(message);
+        completeLabel.getStyleClass().add(isNewRecord ? "newRecordStyle" : "gameCompleteStyle");
+        completeLabel.setStyle("-fx-text-alignment: center; -fx-wrap-text: true;");
+        completeLabel.setMaxWidth(400);
+
+        BorderPane completePanel = new BorderPane();
+        completePanel.setCenter(completeLabel);
+        completePanel.setVisible(true);
+        completePanel.setMaxWidth(450);
+        completePanel.setMaxHeight(300);
+
+        groupNotification.getChildren().clear();
+        groupNotification.getChildren().add(completePanel);
+
+        // Center the notification
+        Platform.runLater(() -> centerNoti());
+
+        isGameOver.setValue(Boolean.TRUE);
+    }
+
     public void newGame(ActionEvent actionEvent) {
+        groupNotification.getChildren().clear();
         timeLine.stop();
         gameOverPanel.setVisible(false);
         eventListener.createNewGame();
