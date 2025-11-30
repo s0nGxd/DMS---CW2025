@@ -47,9 +47,9 @@ public class SRSKickData {
             // From state 3
             {
                     // 3->0 (clockwise to 0)
-                    { new Point(0, 0), new Point(1, 0), new Point(1, 1), new Point(0, -2), new Point(1, -2) },
+                    { new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, 2), new Point(-1, 2) },
                     // 3->2 (counter-clockwise to 2)
-                    { new Point(0, 0), new Point(1, 0), new Point(1, 1), new Point(0, -2), new Point(1, -2) }
+                    { new Point(0, 0), new Point(-1, 0), new Point(-1, -1), new Point(0, 2), new Point(-1, 2) }
             }
     };
 
