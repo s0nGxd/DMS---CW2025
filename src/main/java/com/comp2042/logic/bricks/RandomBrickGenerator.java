@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomBrickGenerator implements BrickGenerator {
@@ -11,6 +12,9 @@ public class RandomBrickGenerator implements BrickGenerator {
     private final List<Brick> brickList;
 
     private final Deque<Brick> nextBricks = new ArrayDeque<>();
+
+    // Show 4 future bricks
+    private static final int NEXT_BRICKS_COUNT = 4;
 
     public RandomBrickGenerator() {
         brickList = new ArrayList<>();
@@ -21,13 +25,15 @@ public class RandomBrickGenerator implements BrickGenerator {
         brickList.add(new SBrick());
         brickList.add(new TBrick());
         brickList.add(new ZBrick());
-        nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
-        nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+        // Generate 4 next bricks
+        for (int i = 0; i < NEXT_BRICKS_COUNT; i++) {
+            nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+        }
     }
 
     @Override
     public Brick getBrick() {
-        if (nextBricks.size() <= 1) {
+        if (nextBricks.size() <= NEXT_BRICKS_COUNT) {
             nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
         }
         return nextBricks.poll();
@@ -36,5 +42,18 @@ public class RandomBrickGenerator implements BrickGenerator {
     @Override
     public Brick getNextBrick() {
         return nextBricks.peek();
+    }
+
+    // Method to add "future" bricks in a list
+    @Override
+    public List<Brick> getNextBricks(int count) {
+        List<Brick> nextBricksList = new ArrayList<>();
+        Iterator<Brick> iterator = nextBricks.iterator();
+
+        for (int i = 0; i < count && iterator.hasNext(); i++) {
+            nextBricksList.add(iterator.next());
+        }
+
+        return nextBricksList;
     }
 }

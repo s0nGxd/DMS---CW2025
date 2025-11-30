@@ -12,6 +12,8 @@ public interface Board {
 
     boolean rotateRightBrick();
 
+    boolean holdCurrentBrick();
+
     boolean createNewBrick();
 
     int[][] getBoardMatrix();
@@ -25,4 +27,16 @@ public interface Board {
     Score getScore();
 
     void newGame();
+
+    void setGameMode(GameMode mode);
+
+    GameMode getGameMode();
+
+    int getLinesCleared();
+
+    long getGameStartTime();
+
+    int getCurrentLevel();
+
+    int getFallSpeed();
 }

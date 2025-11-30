@@ -28,6 +28,10 @@ public class BrickRotator {
         return currentShape;
     }
 
+    public Brick getCurrentBrick() {
+        return brick;
+    }
+
     public void setCurrentShape(int currentShape) {
         this.currentShape = currentShape;
     }
