@@ -1,5 +1,17 @@
-package com.comp2042;
+package com.comp2042.controllers;
 
+import com.comp2042.events.InputEventListener;
+import com.comp2042.data.DownData;
+import com.comp2042.data.HighScore;
+import com.comp2042.data.ViewData;
+import com.comp2042.events.EventSource;
+import com.comp2042.events.EventType;
+import com.comp2042.events.GameMode;
+import com.comp2042.events.MoveEvent;
+import com.comp2042.view.GameOverPanel;
+import com.comp2042.view.NotificationPanel;
+import com.comp2042.view.StageManager;
+import com.comp2042.model.SimpleBoard;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -409,24 +421,6 @@ public class GuiController implements Initializable {
         }
     }
 
-    public void gameWon() {
-        timeLine.stop();
-
-        // Create a win message similar to game over
-        Label winLabel = new Label("YOU WIN!");
-        winLabel.getStyleClass().add("gameOverStyle");
-
-        BorderPane winPanel = new BorderPane();
-        winPanel.setCenter(winLabel);
-        winPanel.setVisible(true);
-
-        // Add to notification group
-        groupNotification.getChildren().clear();
-        groupNotification.getChildren().add(winPanel);
-
-        isGameOver.setValue(Boolean.TRUE);
-    }
-
 
     private void initHoldBrickPanel(ViewData viewData) {
         holdBrickPanel.getChildren().clear();
@@ -520,6 +514,14 @@ public class GuiController implements Initializable {
 
     private void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
+            // Clear old rectangles
+            brickPanel.getChildren().clear();
+
+            // Recreate rectangles array with correct size
+            int brickRows = brick.getBrickData().length;
+            int brickCols = brick.getBrickData()[0].length;
+            rectangles = new Rectangle[brickRows][brickCols];
+
             // Clears old Ghost Brick
             if (currentBoardMatrix != null) {
                 for (int i = 2; i < currentBoardMatrix.length; i++) {
@@ -534,9 +536,14 @@ public class GuiController implements Initializable {
 
             brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() + brick.getxPosition() * brickPanel.getVgap() + brick.getxPosition() * BRICK_SIZE);
             brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 + brick.getyPosition() * brickPanel.getHgap() + brick.getyPosition() * BRICK_SIZE);
-            for (int i = 0; i < brick.getBrickData().length; i++) {
-                for (int j = 0; j < brick.getBrickData()[i].length; j++) {
-                    setRectangleData(brick.getBrickData()[i][j], rectangles[i][j]);
+
+            // Add rectangles
+            for (int i = 0; i < brickRows; i++) {
+                for (int j = 0; j < brickCols; j++) {
+                    Rectangle rectangle = new Rectangle(BRICK_SIZE, BRICK_SIZE);
+                    setRectangleData(brick.getBrickData()[i][j], rectangle);
+                    rectangles[i][j] = rectangle;
+                    brickPanel.add(rectangle, j, i);
                 }
             }
             // Update Hold & Next Bricks Panel
@@ -650,7 +657,7 @@ public class GuiController implements Initializable {
         isGameOver.setValue(Boolean.TRUE);
     }
 
-    public void displayHighScores(GameMode mode, HighScoreManager manager) {
+    public void displayHighScores(GameMode mode, HighScore manager) {
         if (progressLabel == null) return;
 
         String highScoreText = "";
@@ -658,7 +665,7 @@ public class GuiController implements Initializable {
             case SPRINT:
                 long bestTime = manager.getSprintBestTime();
                 if (bestTime < 999999999) {
-                    highScoreText = "Best: " + HighScoreManager.formatTime(bestTime);
+                    highScoreText = "Best: " + HighScore.formatTime(bestTime);
                 } else {
                     highScoreText = "Best: --:--";
                 }
@@ -689,22 +696,22 @@ public class GuiController implements Initializable {
         });
     }
 
-    public void showSprintComplete(long completionTime, boolean isNewRecord, HighScoreManager manager) {
+    public void showSprintComplete(long completionTime, boolean isNewRecord, HighScore manager) {
         timeLine.stop();
 
-        String timeStr = HighScoreManager.formatTime(completionTime);
+        String timeStr = HighScore.formatTime(completionTime);
         String message = "40 LINES CLEARED!\n" + timeStr;
         if (isNewRecord) {
             message += "\n✨ NEW RECORD! ✨";
         } else {
             long bestTime = manager.getSprintBestTime();
-            message += "\nBest: " + HighScoreManager.formatTime(bestTime);
+            message += "\nBest: " + HighScore.formatTime(bestTime);
         }
 
         showCompletionMessage(message, isNewRecord);
     }
 
-    public void showBlitzComplete(int finalScore, boolean isNewRecord, HighScoreManager manager) {
+    public void showBlitzComplete(int finalScore, boolean isNewRecord, HighScore manager) {
         timeLine.stop();
 
         String message = "TIME'S UP!\nScore: " + finalScore;
@@ -718,7 +725,7 @@ public class GuiController implements Initializable {
         showCompletionMessage(message, isNewRecord);
     }
 
-    public void showPitfallGameOver(int finalLevel, int finalScore, boolean isNewRecord, HighScoreManager manager) {
+    public void showPitfallGameOver(int finalLevel, int finalScore, boolean isNewRecord, HighScore manager) {
         timeLine.stop();
 
         String message = "GAME OVER\nLevel " + finalLevel + "\nScore: " + finalScore;

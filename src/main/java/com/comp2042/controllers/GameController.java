@@ -1,4 +1,15 @@
-package com.comp2042;
+package com.comp2042.controllers;
+
+import com.comp2042.events.InputEventListener;
+import com.comp2042.data.ClearRow;
+import com.comp2042.data.DownData;
+import com.comp2042.data.HighScore;
+import com.comp2042.data.ViewData;
+import com.comp2042.events.EventSource;
+import com.comp2042.events.GameMode;
+import com.comp2042.events.MoveEvent;
+import com.comp2042.model.Board;
+import com.comp2042.model.SimpleBoard;
 
 public class GameController implements InputEventListener {
 
@@ -6,11 +17,11 @@ public class GameController implements InputEventListener {
     private SimpleBoard simpleBoard;
 
     private final GuiController viewGuiController;
-    private final HighScoreManager highScoreManager;
+    private final HighScore highScore;
 
     public GameController(GuiController c, GameMode mode) {
         viewGuiController = c;
-        highScoreManager = HighScoreManager.getInstance();
+        highScore = HighScore.getInstance();
 
         if (board instanceof SimpleBoard) {
             simpleBoard = (SimpleBoard) board;
@@ -23,15 +34,15 @@ public class GameController implements InputEventListener {
         viewGuiController.bindScore(board.getScore().scoreProperty());
 
         // Display current high scores
-        viewGuiController.displayHighScores(mode, highScoreManager);
+        viewGuiController.displayHighScores(mode, highScore);
     }
 
     public SimpleBoard getSimpleBoard() {
         return simpleBoard;
     }
 
-    public HighScoreManager getHighScoreManager() {
-        return highScoreManager;
+    public HighScore getHighScoreManager() {
+        return highScore;
     }
 
     @Override
@@ -93,23 +104,23 @@ public class GameController implements InputEventListener {
         long completionTime = System.currentTimeMillis() - simpleBoard.getGameStartTime();
         simpleBoard.setCompletionTime(completionTime);
 
-        boolean isNewRecord = highScoreManager.isSprintNewRecord(completionTime);
+        boolean isNewRecord = highScore.isSprintNewRecord(completionTime);
         if (isNewRecord) {
-            highScoreManager.setSprintBestTime(completionTime);
+            highScore.setSprintBestTime(completionTime);
         }
 
-        viewGuiController.showSprintComplete(completionTime, isNewRecord, highScoreManager);
+        viewGuiController.showSprintComplete(completionTime, isNewRecord, highScore);
     }
 
     private void endBlitzMode() {
         int finalScore = board.getScore().scoreProperty().get();
 
-        boolean isNewRecord = highScoreManager.isBlitzNewRecord(finalScore);
+        boolean isNewRecord = highScore.isBlitzNewRecord(finalScore);
         if (isNewRecord) {
-            highScoreManager.setBlitzHighScore(finalScore);
+            highScore.setBlitzHighScore(finalScore);
         }
 
-        viewGuiController.showBlitzComplete(finalScore, isNewRecord, highScoreManager);
+        viewGuiController.showBlitzComplete(finalScore, isNewRecord, highScore);
     }
 
     private void handleGameOver() {
@@ -118,18 +129,18 @@ public class GameController implements InputEventListener {
             int finalScore = simpleBoard.getScore().scoreProperty().get();
             int finalLevel = simpleBoard.getCurrentLevel();
 
-            boolean newLevelRecord = highScoreManager.isPitfallNewLevelRecord(finalLevel);
-            boolean newScoreRecord = highScoreManager.isPitfallNewScoreRecord(finalScore);
+            boolean newLevelRecord = highScore.isPitfallNewLevelRecord(finalLevel);
+            boolean newScoreRecord = highScore.isPitfallNewScoreRecord(finalScore);
 
             if (newLevelRecord) {
-                highScoreManager.setPitfallHighLevel(finalLevel);
+                highScore.setPitfallHighLevel(finalLevel);
             }
             if (newScoreRecord) {
-                highScoreManager.setPitfallHighScore(finalScore);
+                highScore.setPitfallHighScore(finalScore);
             }
 
             viewGuiController.showPitfallGameOver(finalLevel, finalScore,
-                    newLevelRecord || newScoreRecord, highScoreManager);
+                    newLevelRecord || newScoreRecord, highScore);
         } else {
             viewGuiController.gameOver();
         }

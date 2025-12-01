@@ -7,7 +7,7 @@
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
 
-<StackPane fx:controller="com.comp2042.MainMenuController"
+<StackPane fx:controller="com.comp2042.controllers.MainMenuController"
            xmlns:fx="http://javafx.com/fxml"
            stylesheets="@window_style.css"
            styleClass="root">

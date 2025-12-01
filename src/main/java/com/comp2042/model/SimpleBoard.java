@@ -1,5 +1,13 @@
-package com.comp2042;
+package com.comp2042.model;
 
+import com.comp2042.events.GameMode;
+import com.comp2042.data.Score;
+import com.comp2042.logic.MatrixOperations;
+import com.comp2042.data.NextShapeInfo;
+import com.comp2042.data.ViewData;
+import com.comp2042.data.ClearRow;
+import com.comp2042.logic.BrickRotator;
+import com.comp2042.logic.SRSKickData;
 import com.comp2042.logic.bricks.Brick;
 import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;

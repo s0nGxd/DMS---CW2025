@@ -1,22 +1,22 @@
-package com.comp2042;
+package com.comp2042.data;
 
 import java.io.*;
 import java.util.Properties;
 
-public class HighScoreManager {
+public class HighScore {
     private static final String SCORES_FILE = "highscores.properties";
-    private static HighScoreManager instance;
+    private static HighScore instance;
     private Properties properties;
 
-    private HighScoreManager() {
+    private HighScore() {
         properties = new Properties();
         loadScores();
     }
 
     // Ensure only one instance
-    public static HighScoreManager getInstance() {
+    public static HighScore getInstance() {
         if (instance == null) {
-            instance = new HighScoreManager();
+            instance = new HighScore();
         }
         return instance;
     }

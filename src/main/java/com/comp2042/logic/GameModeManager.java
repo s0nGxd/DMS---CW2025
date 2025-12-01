@@ -1,4 +1,6 @@
-package com.comp2042;
+package com.comp2042.logic;
+
+import com.comp2042.events.GameMode;
 
 public class GameModeManager {
     private GameMode currentMode;
