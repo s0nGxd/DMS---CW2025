@@ -2,12 +2,10 @@ package com.comp2042.model;
 
 import com.comp2042.events.GameMode;
 import com.comp2042.data.Score;
-import com.comp2042.logic.MatrixOperations;
+import com.comp2042.logic.*;
 import com.comp2042.data.NextShapeInfo;
 import com.comp2042.data.ViewData;
 import com.comp2042.data.ClearRow;
-import com.comp2042.logic.BrickRotator;
-import com.comp2042.logic.SRSKickData;
 import com.comp2042.logic.bricks.Brick;
 import com.comp2042.logic.bricks.BrickGenerator;
 import com.comp2042.logic.bricks.RandomBrickGenerator;
@@ -22,19 +20,14 @@ public class SimpleBoard implements Board {
     private final int height;
     private final BrickGenerator brickGenerator;
     private final BrickRotator brickRotator;
+    private final GhostBrickCalculator ghostBrickCalculator;
+    private final GameModeManager gameModeManager;
+
     private int[][] currentGameMatrix;
     private Point currentOffset;
     private final Score score;
     private Brick heldBrick = null;
     private boolean heldThisTurn = false;
-
-    private GameMode gameMode = GameMode.ZEN;
-    private int linesCleared = 0;  // For SPRINT
-    private long gameStartTime = 0;  // For BLITZ
-    private int currentLevel = 1;  // For PITFALL
-    private int fallSpeed = 400;  // For PITFALL (milliseconds)
-
-    private long completionTime = 0;
 
     public SimpleBoard(int width, int height) {
         this.width = width;
@@ -43,31 +36,40 @@ public class SimpleBoard implements Board {
         brickGenerator = new RandomBrickGenerator();
         brickRotator = new BrickRotator();
         score = new Score();
-        gameStartTime = System.currentTimeMillis();
+
+        // Initialize components from their class
+        ghostBrickCalculator = new GhostBrickCalculator();
+        gameModeManager = new GameModeManager();
     }
 
+    @Override
     public void setGameMode(GameMode mode) {
-        this.gameMode = mode;
+        gameModeManager.setGameMode(mode);
     }
 
+    @Override
     public GameMode getGameMode() {
-        return gameMode;
+        return gameModeManager.getGameMode();
     }
 
+    @Override
     public int getLinesCleared() {
-        return linesCleared;
+        return gameModeManager.getLinesCleared();
     }
 
+    @Override
     public long getGameStartTime() {
-        return gameStartTime;
+        return gameModeManager.getGameStartTime();
     }
 
+    @Override
     public int getCurrentLevel() {
-        return currentLevel;
+        return gameModeManager.getCurrentLevel();
     }
 
+    @Override
     public int getFallSpeed() {
-        return fallSpeed;
+        return gameModeManager.getFallSpeed();
     }
 
     @Override
@@ -198,41 +200,9 @@ public class SimpleBoard implements Board {
         heldThisTurn = false;
 
         // Initialize game start time on first brick
-        if (gameStartTime == 0) {
-            gameStartTime = System.currentTimeMillis();
-        }
+        gameModeManager.initializeGameStartTime();
 
         return MatrixOperations.intersect(currentGameMatrix, brickRotator.getCurrentShape(), (int) currentOffset.getX(), (int) currentOffset.getY());
-    }
-
-
-     //Calculates the Y position for Ghost Brick
-    private int calculateGhostPosition() {
-        int ghostY = (int) currentOffset.getY();
-        int[][] currentMatrix = MatrixOperations.copy(currentGameMatrix);
-        int currentX = (int) currentOffset.getX();
-        int[][] currentShape = brickRotator.getCurrentShape();
-
-        // Keep moving down until it hit something
-        while (true) {
-            int testY = ghostY + 1;
-
-            // Check if next position down would cause collision
-            boolean collision = MatrixOperations.intersect(
-                    currentMatrix,
-                    currentShape,
-                    currentX,
-                    testY
-            );
-
-            if (collision) {
-                // Can't go further down, ghostY = landing position
-                return ghostY;
-            }
-
-            // Can go further down
-            ghostY = testY;
-        }
     }
 
     @Override
@@ -242,7 +212,9 @@ public class SimpleBoard implements Board {
 
     @Override
     public ViewData getViewData() {
-        int ghostY = calculateGhostPosition();
+        // Use GhostBrickCalculator to get ghost position
+        int ghostY = ghostBrickCalculator.calculateGhostPosition(currentGameMatrix, brickRotator, currentOffset);
+
         int[][] heldBrickData = (heldBrick != null)
                 ? heldBrick.getShapeMatrix().get(0)  // Always show first rotation
                 : null;
@@ -265,14 +237,8 @@ public class SimpleBoard implements Board {
         ClearRow clearRow = MatrixOperations.checkRemoving(currentGameMatrix);
         currentGameMatrix = clearRow.getNewMatrix();
 
-        // Track lines cleared for game modes
-        linesCleared += clearRow.getLinesRemoved();
-
-        // PITFALL: Increase level every 10 lines
-        if (gameMode == GameMode.PITFALL && linesCleared / 10 > currentLevel - 1) {
-            currentLevel = linesCleared / 10 + 1;
-            fallSpeed = Math.max(100, 400 - (currentLevel - 1) * 30); // Speed up
-        }
+        // Update game mode manager with cleared lines
+        gameModeManager.updateAfterLineClear(clearRow.getLinesRemoved());
 
         return clearRow;
     }
@@ -283,11 +249,11 @@ public class SimpleBoard implements Board {
     }
 
     public long getCompletionTime() {
-        return completionTime;
+        return gameModeManager.getCompletionTime();
     }
 
     public void setCompletionTime(long time) {
-        this.completionTime = time;
+        gameModeManager.setCompletionTime(time);
     }
 
 
@@ -299,10 +265,7 @@ public class SimpleBoard implements Board {
         heldBrick = null;
 
         // Reset game mode variables
-        linesCleared = 0;
-        gameStartTime = 0;
-        currentLevel = 1;
-        fallSpeed = 400;
+        gameModeManager.reset();
 
         createNewBrick();
     }
