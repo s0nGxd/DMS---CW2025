@@ -34,7 +34,9 @@ public class GameController implements InputEventListener {
         viewGuiController.bindScore(board.getScore().scoreProperty());
 
         // Display current high scores
-        viewGuiController.displayHighScores(mode, highScore);
+        if (mode == GameMode.ZEN) {
+            viewGuiController.displayHighScores(mode, highScore);
+        }
     }
 
     public SimpleBoard getSimpleBoard() {

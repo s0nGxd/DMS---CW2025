@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
-<Pane fx:controller="com.comp2042.controllers.GuiController"
+<Pane fx:id="rootPane" fx:controller="com.comp2042.controllers.GuiController"
       xmlns:fx="http://javafx.com/fxml"
       styleClass="root">
 
