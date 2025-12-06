@@ -36,10 +36,6 @@ public class UILayoutManager {
         this.groupNotification = groupNotification;
     }
 
-    public void setEventListener(InputEventListener eventListener) {
-        this.eventListener = eventListener;
-    }
-
     public void centerNotification() {
         double centerX = gameBoard.getLayoutX() + (gameBoard.getWidth() / 2);
         double centerY = gameBoard.getLayoutY() + (gameBoard.getHeight() / 2);
@@ -122,10 +118,10 @@ public class UILayoutManager {
     public void updateBrickPosition(ViewData viewData, int brickSize) {
         if (brickPanel != null && viewData != null) {
             brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() +
-                    viewData.getxPosition() * brickPanel.getVgap() +
+                    viewData.getxPosition() * brickPanel.getHgap() +
                     viewData.getxPosition() * brickSize);
             brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 +
-                    viewData.getyPosition() * brickPanel.getHgap() +
+                    viewData.getyPosition() * brickPanel.getVgap() +
                     viewData.getyPosition() * brickSize);
         }
     }

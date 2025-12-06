@@ -56,7 +56,7 @@ public class GameMessage {
             }
         });
         groupNotification.toFront();
-        layoutManager.centerNotification();
+        Platform.runLater(layoutManager::centerNotification);
     }
 
     public void showSprintComplete(long completionTime, boolean isNewRecord, HighScore manager) {
@@ -69,8 +69,6 @@ public class GameMessage {
             message += "\nBest: " + HighScore.formatTime(bestTime);
         }
         showCompletionMessage(message, isNewRecord);
-        groupNotification.toFront();
-        layoutManager.centerNotification();
     }
 
     public void showBlitzComplete(int finalScore, boolean isNewRecord, HighScore manager) {
@@ -82,8 +80,6 @@ public class GameMessage {
             message += "\nHigh Score: " + highScore;
         }
         showCompletionMessage(message, isNewRecord);
-        groupNotification.toFront();
-        layoutManager.centerNotification();
     }
 
     public void showPitfallGameOver(int finalLevel, int finalScore, boolean isNewRecord, HighScore manager) {
@@ -96,8 +92,6 @@ public class GameMessage {
             message += "\nBest: Lv." + highLevel + " / " + highScore;
         }
         showCompletionMessage(message, isNewRecord);
-        groupNotification.toFront();
-        layoutManager.centerNotification();
     }
 
     private void showCompletionMessage(String message, boolean isNewRecord) {
@@ -116,7 +110,7 @@ public class GameMessage {
         groupNotification.getChildren().add(completePanel);
 
         groupNotification.toFront();
-        layoutManager.centerNotification();
+        Platform.runLater(layoutManager::centerNotification);
     }
 
     public void clearNotifications() {
