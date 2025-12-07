@@ -35,10 +35,25 @@ The following features were successfully implemented and tested to be working as
   * Shows the next 4 upcoming bricks
   * Rendered with NextPanelRenderer class
 
+***Hold Brick***
+  * Added the ability to hold a brick for later use
+  * Handles by swapping the current brick with the one holding
+  * Initiate hold by pressing the "C" key
+
 ***Hard Drop***
   * Instantly drops piece to the bottom where it lands
   * Instantly locks on landing
   * Special scoring for hard drops
+
+***7 Bag Random Generator***
+  * Uses the official tetris random brick generator system
+  * Random bricks are drawn from the bag randomly until all 7 are gone then refill
+  * Prevent long droughts for any single piece
+
+***Delay System***
+  * Added a boolean to delay the brick from merging to the background immediately
+  * Allow for more rotational and movement plays
+  * Bricks can still move upon touching the ground until the next drop tick
 
 ***4 Unique Game Modes***
   * All handled through GameModeManager class
@@ -73,30 +88,42 @@ The following features were successfully implemented and tested to be working as
 * **Online Leaderboards:** implemented core game modes due to time contstrain. High scores are currently local-only
 
 ## New Java Classes
-| Class | Location | Description |
+| Class | Package | Description |
 | :--- | :--- | :--- |
-| `MainMenuController` | `controllers` | Manages the logic for the new main menu and game mode selection. |
-| `StageManager` | `view` | Singleton class that handles scene switching and window properties (like fullscreen) centrally. |
-| `GameModeManager` | `logic` | Encapsulates logic for different game rules (Zen, Sprint, Blitz, Pitfall), effectively separating rules from the board. |
-| `SRSKickData` | `logic` | Contains the offset data tables required for the Super Rotation System (SRS) wall kicks. |
-| `GhostBrickCalculator` | `logic` | Logic for calculating the y-coordinate of the ghost piece based on the current board state. |
-| `GhostBrickRenderer` | `view` | Handles the specific UI rendering logic for the semi-transparent ghost brick. |
-| `HighScore` | `data` | Singleton that manages loading and saving high scores/times to a properties file. |
-| `GameMessage` | `view` | Handles displaying overlay messages (e.g., "Game Over", "New Record") to declutter the Controller. |
-| `UILayoutManager` | `view` | Manages the responsive resizing and centering of UI elements when the window size changes. |
-| `ColourMapper` | `view` | Extracted logic for mapping integer block IDs to JavaFX Paint colors. |
+| `MainMenuController` | `controllers` | Manages the entry point UI and game mode selection logic. |
+| `InputHandler` | `controllers` | Decouples input handling from the Controller, mapping key events to game actions. |
+| `StageManager` | `view` | **Singleton Pattern.** Centralizes scene navigation and window property management (Fullscreen/Resizing). |
+| `UILayoutManager` | `view` | Handles the mathematical logic required to center the game board and panels dynamically when the window resizes. |
+| `GameModeManager` | `logic` | **Strategy-like Pattern.** Encapsulates rules for different modes (Zen, Sprint, etc.), separating game rules from the board grid. |
+| `SRSKickData` | `logic` | A data-holder class containing the static offset tables required for standard Tetris wall kicks. |
+| `GhostBrickCalculator` | `logic` | Specialized logic to calculate the `y` coordinate of the ghost piece without modifying the actual board state. |
+| `GameConstants` | `constant` | Centralized file for magic numbers (Board size, brick size, speeds) to improve maintainability. |
+| `HighScore` | `data` | **Singleton Pattern.** Manages loading and saving persistent data to `highscores.properties`. |
+| `BrickPanelRenderer` | `render` | **SRP.** Extracted from `GuiController`; handles drawing the active falling brick. |
+| `BoardRenderer` | `render` | **SRP.** Extracted from `GuiController`; handles drawing the static game board. |
+| `GhostBrickRenderer` | `render` | **SRP.** Specialized renderer for the semi-transparent ghost brick. |
+| `NextPanelRenderer` | `render` | **SRP.** Handles drawing the "Next" and "Hold" UI components. |
+| `ColourMapper` | `view` | Maps integer block IDs to JavaFX Colors, removing view dependency from the Model. |
 
 ## Modified Java Classes
-| Class | Changes Made | Rationale |
-| :--- | :--- | :--- |
-| `SimpleBoard` | Added `GameModeManager` integration, `holdCurrentBrick`, and SRS rotation calls. | To support new gameplay mechanics while keeping the board class focused on grid operations. |
-| `GuiController` | Removed hardcoded game logic; delegates UI sizing to `UILayoutManager` and rendering to `GhostBrickRenderer`. | The original class was a "God Class". Refactoring satisfied the Single Responsibility Principle (SRP). |
-| `GameController` | Updated to handle `InputEventListener` for new inputs (Hold, Hard Drop) and Game Mode logic. | To bridge the gap between the new UI inputs and the extended model capabilities. |
-| `ViewData` | Added fields for `ghostPosition`, `heldBrick`, and `nextBricks`. | To transfer the necessary data for the new UI features from Model to View immutable. |
-| `Brick` & subclasses | Updated matrix definitions for I, J, L, S, T, Z bricks. | To align with standard SRS initial rotation states. |
-| `RandomBrickGenerator` | Updated to provide a list of future bricks (bag system). | Required for the "Next Pieces" preview feature. |
-| `BrickRotator` | Added `getNextShapeClockwise` and `CounterClockwise`. | Necessary for SRS to test different rotation directions. |
+The original code (by kooitt) was heavily refactored to adhere to the **Single Responsibility Principle (SRP)** and improve modularity.
 
-## Unexpected Problems
-1.  **SRS Complexity:** Implementing the Super Rotation System was significantly harder than expected. The "Wall Kick" data requires precise offset tables. I resolved this by creating a dedicated `SRSKickData` class to separate this data from the logic, preventing the `SimpleBoard` class from becoming unreadable.
-2.  **JavaFX Layouts:** Making the game board responsive (resizing correctly when maximizing the window) was tricky because the original code using fixed coordinates. I solved this by creating the `UILayoutManager` to recalculate positions dynamically on window property change listeners.
+| Class | Refactoring / Modification | Rationale |
+| :--- | :--- | :--- |
+| `GuiController` | **Major Refactor.** Stripped of all rendering, input, and layout logic. It now acts as a true controller, delegating tasks to `Renderer` classes and `InputHandler`. | The original class was a "God Class" (Antipattern). Splitting it makes the code testable, readable, and maintainable. |
+| `SimpleBoard` | Added `holdCurrentBrick`, `rotateLeft/Right` (SRS), and integration with `GameModeManager`. | Expanded the model to support modern Tetris mechanics while keeping the grid logic isolated from rule logic. |
+| `GameController` | Updated to implement `InputEventListener` for new inputs (Hold, Hard Drop) and handle Game Mode end-conditions. | Needed to bridge the gap between the new UI inputs and the extended logic layer. |
+| `ViewData` | Converted to an Immutable Data Transfer Object. Added fields for `ghostPosition`, `heldBrick`, and `nextBricks`. | To safely pass the state of the new features (Ghost, Hold) from Model to View without exposing internal logic. |
+| `Brick` (and subclasses) | Matrices updated to start in the standard SRS "Spawn" orientation. | Old matrices used arbitrary starting rotations; SRS requires specific initial states for wall kicks to work correctly. |
+| `BrickRotator` | Added `Clockwise` and `CounterClockwise` methods. | SRS requires distinct logic for left vs. right rotation to calculate the correct kick offset from `SRSKickData`. |
+| `RandomBrickGenerator` | Updated to generate a queue of future bricks rather than a single next brick. | Required to support the new "Next Pieces" preview panel showing 4 upcoming blocks. |
+
+## Unexpected Problems & Solutions
+1.  **SRS Wall Kick Logic:** Implementing the Super Rotation System was complex. The standard rotation formulas often resulted in blocks rotating "inside" walls or overlapping other blocks.
+- *Solution:* I implemented `SRSKickData` which holds lookup tables for every possible rotation state transition (e.g., 0->1, 1->0). The `SimpleBoard` now iterates through these test cases until a valid position is found, falling back to "no rotation" if all kicks fail.
+2.  **JavaFX Layout Responsiveness:** The original code used hardcoded `LayoutX/Y` coordinates. When adding a Main Menu and Fullscreen support, the game board would drift off-center or crop incorrectly.
+- *Solution:* I created `UILayoutManager`. It listens to the `Stage` width/height properties and mathematically recalculates the center position of the `GridPane`, ensuring the game stays centered at any resolution.
+3.  **God Class Decomposition:** `GuiController` was initially handling logic, view, and input, making it difficult to add new features like the Hold queue.
+- *Solution:* I applied the Single Responsibility Principle by extracting rendering logic into specific classes (`BrickPanelRenderer`, `GhostBrickRenderer`, etc.) and moving input handling to `InputHandler`. This made adding the "Hold" feature much easier as I only had to modify the specific renderer and input map.
+4.  **Game Transition:** The original transition between the main menu and game modes causes bugs and glitches between transition
+- *Solution:* I added the `Stage Manager` class to handle transition and rearranged the UI spawning sequence to ensure that the initial UI spawn transition is smooth without any weird behaviour
