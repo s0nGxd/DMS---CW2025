@@ -1,10 +1,6 @@
 package com.comp2042.logic.bricks;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.Iterator;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomBrickGenerator implements BrickGenerator {
@@ -12,6 +8,7 @@ public class RandomBrickGenerator implements BrickGenerator {
     private final List<Brick> brickList;
 
     private final Deque<Brick> nextBricks = new ArrayDeque<>();
+    private final Deque<Brick> bag = new ArrayDeque<>(); // Bag for 7-bag system
 
     // Show 4 future bricks
     private static final int NEXT_BRICKS_COUNT = 4;
@@ -27,14 +24,26 @@ public class RandomBrickGenerator implements BrickGenerator {
         brickList.add(new ZBrick());
         // Generate 4 next bricks
         for (int i = 0; i < NEXT_BRICKS_COUNT; i++) {
-            nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+            addBrickFromBag();
         }
+    }
+
+    // Method to handle the Bag System logic
+    private void addBrickFromBag() {
+        if (bag.isEmpty()) {
+            // Refill bag with all 7 bricks and shuffle
+            List<Brick> tempBag = new ArrayList<>(brickList);
+            Collections.shuffle(tempBag);
+            bag.addAll(tempBag);
+        }
+        // Move brick from bag to the queue
+        nextBricks.add(bag.poll());
     }
 
     @Override
     public Brick getBrick() {
         if (nextBricks.size() <= NEXT_BRICKS_COUNT) {
-            nextBricks.add(brickList.get(ThreadLocalRandom.current().nextInt(brickList.size())));
+            addBrickFromBag();
         }
         return nextBricks.poll();
     }

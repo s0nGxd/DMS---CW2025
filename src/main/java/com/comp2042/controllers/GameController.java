@@ -22,6 +22,9 @@ public class GameController implements InputEventListener {
     private final GuiController viewGuiController;
     private final HighScore highScore;
 
+    // Track lock delay
+    private boolean lockDelayActive = false;
+
     public GameController(GuiController c, GameMode mode) {
         viewGuiController = c;
         highScore = HighScore.getInstance();
@@ -46,15 +49,19 @@ public class GameController implements InputEventListener {
         return simpleBoard;
     }
 
-    public HighScore getHighScoreManager() {
-        return highScore;
-    }
-
     @Override
     public DownData onDownEvent(MoveEvent event) {
         boolean canMove = board.moveBrickDown();
         ClearRow clearRow = null;
         if (!canMove) {
+            if (!lockDelayActive) {
+                // First time hitting bottom: Activate delay and do NOT merge yet
+                lockDelayActive = true;
+                return new DownData(null, board.getViewData());
+            }
+
+            // If we are here, lockDelayActive is true (2nd tick at bottom), so we lock.
+            lockDelayActive = false; // Reset flag
             board.mergeBrickToBackground();
             clearRow = board.clearRows();
             if (clearRow.getLinesRemoved() > 0) {
@@ -153,6 +160,7 @@ public class GameController implements InputEventListener {
 
     @Override
     public DownData onDropEvent(MoveEvent event) {
+        lockDelayActive = false;
         ClearRow clearRow = null;
         while(board.moveBrickDown()){
             // Loop to Keep Dropping until the Bottom
@@ -183,36 +191,42 @@ public class GameController implements InputEventListener {
     @Override
     public ViewData onLeftEvent(MoveEvent event) {
         board.moveBrickLeft();
+        lockDelayActive = false;
         return board.getViewData();
     }
 
     @Override
     public ViewData onRightEvent(MoveEvent event) {
         board.moveBrickRight();
+        lockDelayActive = false;
         return board.getViewData();
     }
 
     @Override
     public ViewData onRotateLeftEvent(MoveEvent event) {
         board.rotateLeftBrick();
+        lockDelayActive = false;
         return board.getViewData();
     }
 
     @Override
     public ViewData onRotateRightEvent(MoveEvent event) {
         board.rotateRightBrick();
+        lockDelayActive = false;
         return board.getViewData();
     }
 
     @Override
     public ViewData onHoldEvent(MoveEvent event) {
         board.holdCurrentBrick();  // Run the hold function
+        lockDelayActive = false;
         return board.getViewData();  // Return updated view
     }
 
     @Override
     public void createNewGame() {
         board.newGame();
+        lockDelayActive = false;
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
     }
 

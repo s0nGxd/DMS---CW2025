@@ -133,7 +133,7 @@ public class GuiController implements Initializable {
 
         colourMapper = new ColourMapper();
         boardRenderer = new BoardRenderer(gamePanel, colourMapper);
-        brickPanelRenderer = new BrickPanelRenderer(brickPanel, colourMapper);
+        brickPanelRenderer = new BrickPanelRenderer(gamePanel, colourMapper);
         nextBrickRenderer = new NextPanelRenderer(holdBrickPanel, nextBricksPanel, colourMapper);
         inputHandler = new InputHandler(isPause, isGameOver);
 
@@ -245,10 +245,6 @@ public class GuiController implements Initializable {
 
             // Render new Ghost Brick
             ghostRenderer.renderGhostBrick(brick);
-
-            if (layoutManager != null) {
-                layoutManager.updateBrickPosition(brick);
-            }
 
             brickPanelRenderer.renderBrick(brick);
 
