@@ -248,10 +248,6 @@ public class SimpleBoard implements Board {
         return score;
     }
 
-    public long getCompletionTime() {
-        return gameModeManager.getCompletionTime();
-    }
-
     public void setCompletionTime(long time) {
         gameModeManager.setCompletionTime(time);
     }

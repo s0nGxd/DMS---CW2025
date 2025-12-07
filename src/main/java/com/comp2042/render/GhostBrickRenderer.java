@@ -1,10 +1,12 @@
-package com.comp2042.view;
+package com.comp2042.render;
 
 import com.comp2042.data.ViewData;
 import com.comp2042.view.ColourMapper;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
+
+import static com.comp2042.render.GameConstants.*;
 
 public class GhostBrickRenderer {
 
@@ -33,8 +35,7 @@ public class GhostBrickRenderer {
                     int boardRow = ghostY + i;
                     int boardCol = ghostX + j;
 
-                    // Make sure its within bounds and within visible area (row 2+)
-                    if (boardRow >= 2 && boardRow < displayMatrix.length &&
+                    if (boardRow >= VISIBLE_ROWS_START && boardRow < displayMatrix.length &&
                             boardCol >= 0 && boardCol < displayMatrix[0].length) {
 
                         Paint baseColor = colourMapper.getFillColor(brickData[i][j]);
@@ -45,12 +46,12 @@ public class GhostBrickRenderer {
                                     color.getRed(),
                                     color.getGreen(),
                                     color.getBlue(),
-                                    0.3  // 30% opacity
+                                    GHOST_OPACITY
                             );
 
                             displayMatrix[boardRow][boardCol].setFill(ghostColor);
-                            displayMatrix[boardRow][boardCol].setArcHeight(9);
-                            displayMatrix[boardRow][boardCol].setArcWidth(9);
+                            displayMatrix[boardRow][boardCol].setArcHeight(BRICK_ARC_SIZE);
+                            displayMatrix[boardRow][boardCol].setArcWidth(BRICK_ARC_SIZE);
                         }
                     }
                 }

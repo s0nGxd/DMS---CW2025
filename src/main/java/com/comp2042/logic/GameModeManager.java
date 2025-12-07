@@ -86,20 +86,6 @@ public class GameModeManager {
         }
     }
 
-    public boolean isGameOver() {
-        return gameCompleted;
-    }
-
-    public String getCompletionMessage() {
-        switch (currentMode) {
-            case SPRINT: return "Sprint Complete! Cleared 40 lines!";
-            case BLITZ: return "Time's up! Blitz mode completed!";
-            case PITFALL: return "Reached Level " + level + " in Pitfall mode!";
-            case ZEN: return "Zen session: " + linesCleared + " lines cleared";
-            default: return "Game Complete!";
-        }
-    }
-
 
     private void updateFallSpeed() {
         fallSpeed = Math.max(100, 400 - (level - 1) * 30);

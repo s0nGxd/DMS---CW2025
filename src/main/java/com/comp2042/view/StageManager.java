@@ -124,14 +124,6 @@ public class StageManager {
         return primaryStage;
     }
 
-    public double getLastWidth() {
-        return lastWidth;
-    }
-
-    public double getLastHeight() {
-        return lastHeight;
-    }
-
     @FunctionalInterface
     public interface SceneInitializer {
         void initialize(Object controller);

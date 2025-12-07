@@ -2,6 +2,7 @@ package com.comp2042.view;
 
 import com.comp2042.data.ViewData;
 import com.comp2042.events.InputEventListener;
+import com.comp2042.render.GameConstants;
 import javafx.scene.Group;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -34,6 +35,32 @@ public class UILayoutManager {
         this.heldBrickBox = heldBrickBox;
         this.nextBricksBox = nextBricksBox;
         this.groupNotification = groupNotification;
+    }
+
+    public void updateBrickPosition(ViewData viewData, int brickSize) {
+        if (brickPanel != null && viewData != null) {
+            brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() +
+                    viewData.getxPosition() * brickPanel.getVgap() +
+                    viewData.getxPosition() * brickSize);
+            brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 +
+                    viewData.getyPosition() * brickPanel.getHgap() +
+                    viewData.getyPosition() * brickSize);
+        }
+    }
+
+    public void setEventListener(InputEventListener eventListener) {
+        this.eventListener = eventListener;
+    }
+
+    public void updateBrickPosition(ViewData viewData) {
+        if (brickPanel != null && viewData != null) {
+            brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() +
+                    viewData.getxPosition() * brickPanel.getVgap() +
+                    viewData.getxPosition() * GameConstants.BRICK_SIZE);
+            brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() + GameConstants.BRICK_Y_OFFSET +
+                    viewData.getyPosition() * brickPanel.getHgap() +
+                    viewData.getyPosition() * GameConstants.BRICK_SIZE);
+        }
     }
 
     public void centerNotification() {
@@ -113,16 +140,5 @@ public class UILayoutManager {
             brickPanel.setLayoutY(gameBoard.getLayoutY());
         }
         centerNotification();
-    }
-
-    public void updateBrickPosition(ViewData viewData, int brickSize) {
-        if (brickPanel != null && viewData != null) {
-            brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() +
-                    viewData.getxPosition() * brickPanel.getHgap() +
-                    viewData.getxPosition() * brickSize);
-            brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 +
-                    viewData.getyPosition() * brickPanel.getVgap() +
-                    viewData.getyPosition() * brickSize);
-        }
     }
 }
