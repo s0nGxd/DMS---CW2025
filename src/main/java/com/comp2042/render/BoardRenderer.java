@@ -1,5 +1,6 @@
 package com.comp2042.render;
 
+import com.comp2042.constant.GameConstants;
 import com.comp2042.view.ColourMapper;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;

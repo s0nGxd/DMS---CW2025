@@ -6,7 +6,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 
-import static com.comp2042.render.GameConstants.*;
+import static com.comp2042.constant.GameConstants.*;
 
 public class GhostBrickRenderer {
 

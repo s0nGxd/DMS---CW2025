@@ -1,4 +1,4 @@
-package com.comp2042.render;
+package com.comp2042.constant;
 
 public final class GameConstants {
 
@@ -12,8 +12,8 @@ public final class GameConstants {
     public static final double GHOST_OPACITY = 0.3;
 
     // Board Dimensions
-    public static final int BOARD_WIDTH = 10;
-    public static final int BOARD_HEIGHT = 25;
+    public static final int BOARD_WIDTH = 25;
+    public static final int BOARD_HEIGHT = 10;
     public static final int VISIBLE_ROWS_START = 2;
 
     // Timing

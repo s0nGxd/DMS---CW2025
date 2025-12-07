@@ -1,5 +1,6 @@
 package com.comp2042.controllers;
 
+import com.comp2042.constant.GameConstants;
 import com.comp2042.render.*;
 import com.comp2042.events.InputEventListener;
 import com.comp2042.data.DownData;

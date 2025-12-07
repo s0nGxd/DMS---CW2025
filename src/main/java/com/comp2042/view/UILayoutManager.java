@@ -2,7 +2,7 @@ package com.comp2042.view;
 
 import com.comp2042.data.ViewData;
 import com.comp2042.events.InputEventListener;
-import com.comp2042.render.GameConstants;
+import com.comp2042.constant.GameConstants;
 import javafx.scene.Group;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;

@@ -11,9 +11,12 @@ import com.comp2042.events.MoveEvent;
 import com.comp2042.model.Board;
 import com.comp2042.model.SimpleBoard;
 
+import static com.comp2042.constant.GameConstants.BOARD_HEIGHT;
+import static com.comp2042.constant.GameConstants.BOARD_WIDTH;
+
 public class GameController implements InputEventListener {
 
-    private Board board = new SimpleBoard(25, 10);
+    private Board board = new SimpleBoard(BOARD_WIDTH, BOARD_HEIGHT);
     private SimpleBoard simpleBoard;
 
     private final GuiController viewGuiController;
