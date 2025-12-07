@@ -1,4 +1,4 @@
-package com.comp2042;
+package com.comp2042.logic;
 
 import java.awt.Point;
 
@@ -9,6 +9,7 @@ import java.awt.Point;
 
  References:
   - https://tetris.wiki/Super_Rotation_System
+  - https://tetris.fandom.com/wiki/Super_Rotation_System
   - https://harddrop.com/wiki/SRS
   - tetr.io
  */

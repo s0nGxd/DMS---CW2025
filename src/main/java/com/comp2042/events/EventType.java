@@ -1,4 +1,4 @@
-package com.comp2042;
+package com.comp2042.events;
 
 public enum EventType {
     DOWN, DROP, LEFT, RIGHT, ROTATE_LEFT, ROTATE_RIGHT, HOLD

@@ -1,5 +1,6 @@
-package com.comp2042;
+package com.comp2042.view;
 
+import com.comp2042.controllers.MainMenuController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -121,14 +122,6 @@ public class StageManager {
 
     public Stage getPrimaryStage() {
         return primaryStage;
-    }
-
-    public double getLastWidth() {
-        return lastWidth;
-    }
-
-    public double getLastHeight() {
-        return lastHeight;
     }
 
     @FunctionalInterface

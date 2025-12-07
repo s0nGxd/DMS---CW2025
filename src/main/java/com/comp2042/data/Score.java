@@ -1,4 +1,4 @@
-package com.comp2042;
+package com.comp2042.data;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
