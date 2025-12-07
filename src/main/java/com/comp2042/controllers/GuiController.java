@@ -23,10 +23,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.effect.Reflection;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -40,6 +37,7 @@ public class GuiController implements Initializable {
     private Stage mainStage;
     private MainMenuController mainMenuController;
 
+   @FXML private Pane rootPane;
     @FXML private GridPane gamePanel;
     @FXML private Group groupNotification;
     @FXML private GridPane brickPanel;
@@ -127,6 +125,9 @@ public class GuiController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (rootPane != null) {
+            rootPane.setOpacity(0);
+        }
         Font.loadFont(getClass().getClassLoader().getResource("digital.ttf").toExternalForm(), 38);
 
         colourMapper = new ColourMapper();
@@ -157,24 +158,27 @@ public class GuiController implements Initializable {
     }
 
     public void initGameView(int[][] boardMatrix, ViewData brick) {
-        ghostRenderer = new GhostBrickRenderer(boardRenderer.initializeBoard(boardMatrix), colourMapper);
-
-        // Position brick panel FIRST, before adding any rectangles
-        if (layoutManager != null) {
-            layoutManager.updateBrickPosition(brick);
-        }
-
         brickPanelRenderer.renderBrick(brick);
         nextBrickRenderer.renderHoldBrick(brick.getHeldBrickData());
         nextBrickRenderer.renderNextBricks(brick.getNextBricksData());
 
+        ghostRenderer = new GhostBrickRenderer(boardRenderer.initializeBoard(boardMatrix), colourMapper);
+
+        // Position brick panel FIRST, before adding any rectangles
+        Platform.runLater(() -> {
+            if (layoutManager != null) {
+                layoutManager.updateBrickPosition(brick);
+                layoutManager.updateLayout();
+                refreshBrick(brick);
+
+                if (rootPane != null) {
+                    rootPane.setOpacity(1);
+                }
+            }
+        });
+
         // Update game mode UI BEFORE starting timeline to prevent flash
         updateGameModeUI();
-
-        // Force layout update before starting game
-        if (layoutManager != null) {
-            layoutManager.updateLayout();
-        }
 
         // Get fall speed
         int speed = GameConstants.DEFAULT_FALL_SPEED;
@@ -191,6 +195,7 @@ public class GuiController implements Initializable {
                 ae -> {
                     moveDown(new MoveEvent(EventType.DOWN, EventSource.THREAD));
                     updateGameModeUI();
+
                 }
         ));
         timeLine.setCycleCount(Timeline.INDEFINITE);
@@ -298,6 +303,7 @@ public class GuiController implements Initializable {
         timeLine.stop();
         gameOverPanel.setVisible(true);
         isGameOver.setValue(Boolean.TRUE);
+        Platform.runLater(() -> layoutManager.centerNotification());
     }
 
     public void displayHighScores(GameMode mode, HighScore manager) {
@@ -324,6 +330,9 @@ public class GuiController implements Initializable {
 
     public void newGame(ActionEvent actionEvent) {
         gameMessage.clearNotifications();
+        if (!groupNotification.getChildren().contains(gameOverPanel)) {
+            groupNotification.getChildren().add(gameOverPanel);
+        }
         timeLine.stop();
         gameOverPanel.setVisible(false);
         eventListener.createNewGame();
