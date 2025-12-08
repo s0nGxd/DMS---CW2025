@@ -8,17 +8,31 @@ import javafx.scene.shape.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Renders the active falling brick on the game board.
+ * Manages the visual representation of the current piece.
+ */
+
 public class BrickPanelRenderer {
 
     private final GridPane gamePanel; // Changed: Target the main game board
     private final ColourMapper colourMapper;
     private final List<Rectangle> activeRectangles = new ArrayList<>(); // New: Track active pieces
 
+    /**
+     * Constructs a BrickPanelRenderer.
+     * @param gamePanel the GridPane to render into
+     * @param colourMapper the color mapping utility
+     */
     public BrickPanelRenderer(GridPane gamePanel, ColourMapper colourMapper) {
         this.gamePanel = gamePanel;
         this.colourMapper = colourMapper;
     }
 
+    /**
+     * Renders the current brick at its position.
+     * @param brick the view data containing brick information
+     */
     public void renderBrick(ViewData brick) {
         // 1. Clear old falling piece from the main board
         for (Rectangle rect : activeRectangles) {
@@ -48,6 +62,9 @@ public class BrickPanelRenderer {
         }
     }
 
+    /**
+     * Set the brick's colour from colourMapper
+     */
     private void setRectangleData(int color, Rectangle rectangle) {
         rectangle.setFill(colourMapper.getFillColor(color));
         rectangle.setArcHeight(GameConstants.BRICK_ARC_SIZE);

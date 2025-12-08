@@ -8,16 +8,30 @@ import javafx.scene.shape.Rectangle;
 
 import static com.comp2042.constant.GameConstants.*;
 
+/**
+ * Renders the ghost brick showing where the active piece will land.
+ * Displays a semi-transparent preview at the drop position.
+ */
+
 public class GhostBrickRenderer {
 
     private final Rectangle[][] displayMatrix;
     private final ColourMapper colourMapper;
 
+    /**
+     * Constructs a GhostBrickRenderer.
+     * @param displayMatrix the board's display matrix
+     * @param colourMapper the color mapping utility
+     */
     public GhostBrickRenderer(Rectangle[][] displayMatrix, ColourMapper colourMapper) {
         this.displayMatrix = displayMatrix;
         this.colourMapper = colourMapper;
     }
 
+    /**
+     * Renders the ghost brick at the landing position.
+     * @param brick the view data containing position information
+     */
     // Render the ghost brick together with other bricks (shows where the current brick will land)
     public void renderGhostBrick(ViewData brick) {
         // Don't show ghost if brick is already landed

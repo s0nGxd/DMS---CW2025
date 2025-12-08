@@ -3,20 +3,27 @@ package com.comp2042.logic;
 import java.awt.Point;
 
 /**
- Super Rotation System (SRS) wall kick data
-
- Performs positional rotations and wall kicks for when the blocks are at the edge
-
- References:
-  - https://tetris.wiki/Super_Rotation_System
-  - https://tetris.fandom.com/wiki/Super_Rotation_System
-  - https://harddrop.com/wiki/SRS
-  - tetr.io
+ * Contains Super Rotation System (SRS) wall kick offset data tables.
+ *
+ * <p>SRS is the official Tetris rotation system that allows pieces to "kick"
+ * off walls and other blocks when rotating. This class stores the precise
+ * offset data for all kick tests, organized by brick type and rotation direction.</p>
+ *
+ * <p>Three kick tables are defined:
+ * - JLSTZ_KICKS: For J, L, S, T, and Z pieces
+ * - I_KICKS: Special table for I piece (horizontal/vertical transitions)
+ * - O_KICKS: No rotation (O piece doesn't rotate)</p>
+ *
+ * <p>References:
+ * - https://tetris.wiki/Super_Rotation_System
+ * - https://harddrop.com/wiki/SRS
+ * - https://tetris.fandom.com/wiki/Super_Rotation_System</p>
+ * - tetr.io
  */
 
 public class SRSKickData {
     /**
-     * Format: [from_state][direction][test_number]
+     * Kick data table for JLSTZ Bricks
      * - from_state: Current rotation state (0-3)
      * - direction: 0 = clockwise, 1 = counter-clockwise
      * - test_number: Which kick to try (0-4, in order of priority)
@@ -54,6 +61,12 @@ public class SRSKickData {
             }
     };
 
+    /**
+     * Kick data table for I Brick
+     * - from_state: Current rotation state (0-3)
+     * - direction: 0 = clockwise, 1 = counter-clockwise
+     * - test_number: Which kick to try (0-4, in order of priority)
+     */
     // Kick offsets for the I-Brick
     private static final Point[][][] I_KICKS = {
             // From state 0
@@ -86,6 +99,12 @@ public class SRSKickData {
             }
     };
 
+    /**
+     * Kick data table for O Brick
+     * - from_state: Current rotation state (0-3)
+     * - direction: 0 = clockwise, 1 = counter-clockwise
+     * - test_number: Which kick to try (0-4, in order of priority)
+     */
     // Kick offset for O-Brick
     private static final Point[][][] O_KICKS = {
             { { new Point(0, 0) }, { new Point(0, 0) } },
@@ -95,8 +114,19 @@ public class SRSKickData {
     };
 
     /**
-     Determine Kick Offset base on Specific Rotation
-     Determine Brick Type through colour value, Rotational State and The next Rotational State
+     * Returns a specific wall kick to use
+     *
+     * <p>Determines which kick table to use based on brick type (I=1, O=4, others=JLSTZ),
+     * calculates rotation direction (clockwise vs counter-clockwise), and returns
+     * the appropriate array of kick offsets in priority order.</p>
+     *
+     * <p>Kick offsets are tested in order until one succeeds or all fail. Each offset
+     * is an (x,y) displacement to try for the rotated piece.</p>
+     *
+     * @param brickType brick color ID (1=I, 2=J, 3=L, 4=O, 5=S, 6=T, 7=Z)
+     * @param fromState current rotation state (0-3)
+     * @param toState target rotation state (0-3)
+     * @return array of Point offsets to test in priority order
      */
     public static Point[] getKickOffsets(int brickType, int fromState, int toState) {
         // Determine rotation direction

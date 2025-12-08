@@ -9,6 +9,11 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Singleton manager for JavaFX stage and scene transitions.
+ * Handles window state preservation and fullscreen toggling.
+ */
+
 public class StageManager {
     private static StageManager instance;
     private Stage primaryStage;
@@ -17,12 +22,20 @@ public class StageManager {
 
     private boolean isInGame = false;
 
+    /**
+     * Sets whether the game is currently in gameplay state.
+     * @param inGame true if in gameplay, false if in menu
+     */
     public void setInGame(boolean inGame) {
         this.isInGame = inGame;
     }
 
     private StageManager() {}
 
+    /**
+     * Gets the singleton instance of StageManager.
+     * @return the shared StageManager instance
+     */
     public static StageManager getInstance() {
         if (instance == null) {
             instance = new StageManager();
@@ -30,6 +43,10 @@ public class StageManager {
         return instance;
     }
 
+    /**
+     * Sets the primary stage for the application.
+     * @param stage the primary JavaFX stage
+     */
     public void setPrimaryStage(Stage stage) {
         this.primaryStage = stage;
         this.primaryStage.setFullScreenExitHint("");  // ADD THIS - Disables ESC to exit fullscreen
@@ -37,6 +54,9 @@ public class StageManager {
         setupStageListeners();
     }
 
+    /**
+     * Sets up listeners for stage events and keyboard shortcuts.
+     */
     private void setupStageListeners() {
         primaryStage.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -68,6 +88,11 @@ public class StageManager {
         });
     }
 
+    /**
+     * Switches to a new FXML scene while preserving window state.
+     * @param fxmlPath the path to the FXML file
+     * @param initializer callback to initialize the controller
+     */
     public void switchScene(String fxmlPath, SceneInitializer initializer) {
         try {
             URL location = getClass().getClassLoader().getResource(fxmlPath);
@@ -104,6 +129,9 @@ public class StageManager {
         }
     }
 
+    /**
+     * Toggles fullscreen mode on/off.
+     */
     public void toggleFullscreen() {
         if (primaryStage != null) {
             if (primaryStage.isFullScreen()) {
@@ -120,6 +148,10 @@ public class StageManager {
         }
     }
 
+    /**
+     * Gets the primary stage.
+     * @return the primary JavaFX stage
+     */
     public Stage getPrimaryStage() {
         return primaryStage;
     }

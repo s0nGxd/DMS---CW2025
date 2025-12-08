@@ -3,8 +3,18 @@ package com.comp2042.view;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+/**
+ * Maps integer brick type codes to JavaFX Paint colors.
+ * Provides consistent coloring for all brick types throughout the game.
+ */
+
 public class ColourMapper {
 
+    /**
+     * Gets the fill color for a given brick type code.
+     * @param i the brick type code (0-7)
+     * @return Paint object representing the color for this brick type
+     */
     public Paint getFillColor(int i) {
         Paint returnPaint;
         switch (i) {

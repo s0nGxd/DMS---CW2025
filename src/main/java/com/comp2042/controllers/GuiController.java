@@ -32,13 +32,17 @@ import javafx.util.Duration;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * JavaFX controller managing the game UI and user interactions.
+ * Coordinates rendering, input handling, and game loop timing.
+ */
 public class GuiController implements Initializable {
 
     private GameMode currentGameMode = null;
     private Stage mainStage;
     private MainMenuController mainMenuController;
 
-   @FXML private Pane rootPane;
+    @FXML private Pane rootPane;
     @FXML private GridPane gamePanel;
     @FXML private Group groupNotification;
     @FXML private GridPane brickPanel;
@@ -69,6 +73,10 @@ public class GuiController implements Initializable {
     private GhostBrickRenderer ghostRenderer;
     private ColourMapper colourMapper;
 
+    /**
+     * Sets the stage for this controller.
+     * @param stage the primary JavaFX stage
+     */
     public void setStage(Stage stage){
         this.stage = stage;
 
@@ -94,16 +102,28 @@ public class GuiController implements Initializable {
         // Center immediately when stage is first set
         Platform.runLater(() -> layoutManager.updateLayout());
     }
-    
+
+    /**
+     * Sets the game mode for this session.
+     * @param mode the game mode to play
+     */
     public void setGameMode(GameMode mode) {
         this.currentGameMode = mode;
     }
 
+    /**
+     * Sets the main menu stage and controller.
+     * @param stage the main menu stage
+     * @param menuController the main menu controller
+     */
     public void setMainMenuStage(Stage stage, MainMenuController menuController) {
         this.mainStage = stage;
         this.mainMenuController = menuController;
     }
 
+    /**
+     * Returns to the main menu scene.
+     */
     private void returnToMainMenu() {
         // Prevent any further game actions
         isExiting = true;
@@ -128,6 +148,12 @@ public class GuiController implements Initializable {
         });
     }
 
+    /**
+     * Initializes the controller and sets up UI components.
+     * Loads fonts, initializes renderers, and configures keyboard input handling.
+     * @param location the location used to resolve relative paths for the root object
+     * @param resources the resources used to localize the root object
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (rootPane != null) {
@@ -162,6 +188,12 @@ public class GuiController implements Initializable {
         reflection.setTopOffset(-12);
     }
 
+    /**
+     * Initializes the game view with the initial board and brick state.
+     * Sets up the game loop timeline and begins the game.
+     * @param boardMatrix the initial state of the game board
+     * @param brick the initial brick view data
+     */
     public void initGameView(int[][] boardMatrix, ViewData brick) {
         brickPanelRenderer.renderBrick(brick);
         nextBrickRenderer.renderHoldBrick(brick.getHeldBrickData());
@@ -207,6 +239,9 @@ public class GuiController implements Initializable {
         timeLine.play();
     }
 
+    /**
+     * Updates the game mode UI elements (timer, lines, level).
+     */
     private void updateGameModeUI() {
         if (!(eventListener instanceof GameController)) return;
 
@@ -240,6 +275,11 @@ public class GuiController implements Initializable {
         }
     }
 
+    /**
+     * Refreshes the visual representation of the current brick.
+     * Updates the board background, ghost brick, active brick, and side panels.
+     * @param brick the view data containing current brick information
+     */
     private void refreshBrick(ViewData brick) {
         if (isPause.getValue() == Boolean.FALSE) {
             // Refresh board background
@@ -258,10 +298,19 @@ public class GuiController implements Initializable {
         }
     }
 
+    /**
+     * Refreshes the game board background display.
+     * @param board the current state of the game board matrix
+     */
     public void refreshGameBackground(int[][] board) {
         boardRenderer.refreshBoard(board);
     }
 
+    /**
+     * Handles downward movement of the active brick.
+     * Processes the movement event and updates the display with any cleared rows.
+     * @param event the move event containing movement information
+     */
     private void moveDown(MoveEvent event) {
         if (isPause.getValue() == Boolean.FALSE) {
             DownData downData = eventListener.onDownEvent(event);
@@ -275,7 +324,11 @@ public class GuiController implements Initializable {
         gamePanel.requestFocus();
     }
 
-    // Added Function to Instant Drop to the Bottom
+    /**
+     * Handles hard drop action, instantly dropping the brick to the bottom.
+     * Processes the drop event and updates the display with any cleared rows.
+     * @param event the move event containing drop information
+     */
     private void dropDown(MoveEvent event) {
         if (isPause.getValue() == Boolean.FALSE) {
             DownData dropData = eventListener.onDropEvent(event);
@@ -289,17 +342,28 @@ public class GuiController implements Initializable {
         gamePanel.requestFocus();
     }
 
+    /**
+     * Sets the input event listener for game events.
+     * @param eventListener the listener to handle game input events
+     */
     public void setEventListener(InputEventListener eventListener) {
         this.eventListener = eventListener;
         inputHandler.setEventListener(eventListener);
     }
 
+    /**
+     * Binds the score property to the UI label.
+     * @param integerProperty the score property to bind
+     */
     public void bindScore(IntegerProperty integerProperty) {
         if (scoreValue != null && integerProperty != null) {
             scoreValue.textProperty().bind(integerProperty.asString());
         }
     }
 
+    /**
+     * Displays the game over screen.
+     */
     public void gameOver() {
         timeLine.stop();
         gameOverPanel.setVisible(true);
@@ -307,28 +371,56 @@ public class GuiController implements Initializable {
         Platform.runLater(() -> layoutManager.centerNotification());
     }
 
+    /**
+     * Displays high scores for the current game mode in the progress label.
+     * @param mode the current game mode
+     * @param manager the high score manager containing saved records
+     */
     public void displayHighScores(GameMode mode, HighScore manager) {
         gameMessage.displayHighScores(mode, manager);
     }
 
+    /**
+     * Shows the Sprint mode completion screen with time and record status.
+     * @param completionTime the time taken to complete 40 lines in milliseconds
+     * @param isNewRecord whether this time is a new record
+     * @param manager the high score manager for displaying best times
+     */
     public void showSprintComplete(long completionTime, boolean isNewRecord, HighScore manager) {
         timeLine.stop();
         gameMessage.showSprintComplete(completionTime, isNewRecord, manager);
         isGameOver.setValue(Boolean.TRUE);
     }
 
+    /**
+     * Shows the Blitz mode completion screen with final score and record status.
+     * @param finalScore the final score achieved in 3 minutes
+     * @param isNewRecord whether this score is a new record
+     * @param manager the high score manager for displaying high scores
+     */
     public void showBlitzComplete(int finalScore, boolean isNewRecord, HighScore manager) {
         timeLine.stop();
         gameMessage.showBlitzComplete(finalScore, isNewRecord, manager);
         isGameOver.setValue(Boolean.TRUE);
     }
 
+    /**
+     * Shows the Pitfall mode game over screen with level, score, and record status.
+     * @param finalLevel the final level reached before game over
+     * @param finalScore the final score achieved
+     * @param isNewRecord whether level or score is a new record
+     * @param manager the high score manager for displaying records
+     */
     public void showPitfallGameOver(int finalLevel, int finalScore, boolean isNewRecord, HighScore manager) {
         timeLine.stop();
         gameMessage.showPitfallGameOver(finalLevel, finalScore, isNewRecord, manager);
         isGameOver.setValue(Boolean.TRUE);
     }
 
+    /**
+     * Starts a new game session.
+     * @param actionEvent the triggering action event
+     */
     public void newGame(ActionEvent actionEvent) {
         if (isExiting) return;
 
