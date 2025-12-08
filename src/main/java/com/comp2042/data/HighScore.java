@@ -81,7 +81,7 @@ public class HighScore {
 
     /**
      * Checks if a Sprint time is a new record.
-     * timeMillis is the time to check in milliseconds
+     * @param timeMillis is the time to check in milliseconds
      * @return true if this is a new record, false otherwise
      */
     public boolean isSprintNewRecord(long timeMillis) {
