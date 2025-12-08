@@ -162,8 +162,10 @@ public class GameController implements InputEventListener {
     public DownData onDropEvent(MoveEvent event) {
         lockDelayActive = false;
         ClearRow clearRow = null;
+        // Count the rows dropped
+        int droppedRows = 0;
         while(board.moveBrickDown()){
-            // Loop to Keep Dropping until the Bottom
+            droppedRows++;
         }
         board.mergeBrickToBackground();
         clearRow = board.clearRows();
@@ -183,7 +185,7 @@ public class GameController implements InputEventListener {
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
 
         if (event.getEventSource() == EventSource.USER) {
-            board.getScore().add(1);
+            board.getScore().add(droppedRows);
         }
         return new DownData(clearRow, board.getViewData());
     }

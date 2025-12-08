@@ -60,6 +60,7 @@ public class GuiController implements Initializable {
     private final BooleanProperty isGameOver = new SimpleBooleanProperty();
 
     private UILayoutManager layoutManager;
+    private boolean isExiting = false;
     private GameMessage gameMessage;
     private InputHandler inputHandler;
     private BoardRenderer boardRenderer;
@@ -104,6 +105,9 @@ public class GuiController implements Initializable {
     }
 
     private void returnToMainMenu() {
+        // Prevent any further game actions
+        isExiting = true;
+
         // Stop the timeline
         if (timeLine != null) {
             timeLine.stop();
@@ -326,6 +330,8 @@ public class GuiController implements Initializable {
     }
 
     public void newGame(ActionEvent actionEvent) {
+        if (isExiting) return;
+
         gameMessage.clearNotifications();
         if (!groupNotification.getChildren().contains(gameOverPanel)) {
             groupNotification.getChildren().add(gameOverPanel);
@@ -339,7 +345,4 @@ public class GuiController implements Initializable {
         isGameOver.setValue(Boolean.FALSE);
     }
 
-    public void pauseGame(ActionEvent actionEvent) {
-        gamePanel.requestFocus();
-    }
 }
