@@ -10,6 +10,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * Manages the positioning and layout of all UI components.
+ * Handles dynamic resizing and centering of game elements.
+ */
+
 public class UILayoutManager {
 
     private final Stage stage;
@@ -23,6 +28,19 @@ public class UILayoutManager {
     private final Group groupNotification;
     private InputEventListener eventListener;
 
+    /**
+     * Constructs a UILayoutManager with all UI components.
+     *
+     * @param stage the primary stage
+     * @param gameBoard the game board pane
+     * @param gamePanel the main game grid
+     * @param brickPanel the active brick grid
+     * @param headerArea the header section
+     * @param footerArea the footer section
+     * @param heldBrickBox the held brick display
+     * @param nextBricksBox the next bricks display
+     * @param groupNotification the notification group
+     */
     public UILayoutManager(Stage stage, BorderPane gameBoard, GridPane gamePanel, GridPane brickPanel,
                            HBox headerArea, VBox footerArea, VBox heldBrickBox, VBox nextBricksBox,
                            Group groupNotification) {
@@ -37,21 +55,18 @@ public class UILayoutManager {
         this.groupNotification = groupNotification;
     }
 
-    public void updateBrickPosition(ViewData viewData, int brickSize) {
-        if (brickPanel != null && viewData != null) {
-            brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() +
-                    viewData.getxPosition() * brickPanel.getVgap() +
-                    viewData.getxPosition() * brickSize);
-            brickPanel.setLayoutY(gameBoard.getLayoutY() + gamePanel.getLayoutY() - 42 +
-                    viewData.getyPosition() * brickPanel.getHgap() +
-                    viewData.getyPosition() * brickSize);
-        }
-    }
-
+    /**
+     * Sets the event listener for game events.
+     * @param eventListener the input event listener
+     */
     public void setEventListener(InputEventListener eventListener) {
         this.eventListener = eventListener;
     }
 
+    /**
+     * Updates the brick panel position using default brick size.
+     * @param viewData the current view state
+     */
     public void updateBrickPosition(ViewData viewData) {
         if (brickPanel != null && viewData != null) {
             brickPanel.setLayoutX(gameBoard.getLayoutX() + gamePanel.getLayoutX() +
@@ -63,6 +78,9 @@ public class UILayoutManager {
         }
     }
 
+    /**
+     * Centers the notification group on the game board.
+     */
     public void centerNotification() {
         double centerX = gameBoard.getLayoutX() + (gameBoard.getWidth() / 2);
         double centerY = gameBoard.getLayoutY() + (gameBoard.getHeight() / 2);
@@ -74,6 +92,9 @@ public class UILayoutManager {
         groupNotification.setLayoutY(centerY - notificationHeight / 2);
     }
 
+    /**
+     * Updates all component positions based on current window size.
+     */
     public void updateLayout() {
         if (stage == null) return;
 

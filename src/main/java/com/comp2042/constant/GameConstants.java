@@ -1,5 +1,10 @@
 package com.comp2042.constant;
 
+/**
+ * Centralized constants for game configuration and UI dimensions.
+ * Prevents inconsistency throughout the program
+ */
+
 public final class GameConstants {
 
     private GameConstants() {

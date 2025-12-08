@@ -10,21 +10,45 @@ import javafx.scene.input.KeyCode;
 
 import java.util.function.Consumer;
 
+/**
+ * Handles keyboard input and routes it to appropriate game actions.
+ * Manages input state based on game status (paused, game over).
+ */
+
 public class InputHandler {
 
     private InputEventListener eventListener;
     private final BooleanProperty isPause;
     private final BooleanProperty isGameOver;
 
+    /**
+     * Constructs an InputHandler.
+     * @param isPause the pause state property
+     * @param isGameOver the game over state property
+     */
     public InputHandler(BooleanProperty isPause, BooleanProperty isGameOver) {
         this.isPause = isPause;
         this.isGameOver = isGameOver;
     }
 
+    /**
+     * Sets the event listener for game events.
+     * @param eventListener the input event listener
+     */
     public void setEventListener(InputEventListener eventListener) {
         this.eventListener = eventListener;
     }
 
+    /**
+     * Processes keyboard input and executes corresponding actions.
+     *
+     * @param code the pressed key code
+     * @param returnToMenu callback to return to main menu
+     * @param newGame callback to start a new game
+     * @param refreshBrick callback to refresh brick display
+     * @param moveDown callback for downward movement
+     * @param dropDown callback for hard drop
+     */
     public void handleKeyPress(KeyCode code,
                                Runnable returnToMenu,
                                Runnable newGame,

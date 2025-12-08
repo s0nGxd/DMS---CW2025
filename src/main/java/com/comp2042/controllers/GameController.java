@@ -14,6 +14,11 @@ import com.comp2042.model.SimpleBoard;
 import static com.comp2042.constant.GameConstants.BOARD_HEIGHT;
 import static com.comp2042.constant.GameConstants.BOARD_WIDTH;
 
+/**
+ * Main game controller managing game logic and event handling.
+ * Coordinates between the model (Board) and view (GuiController).
+ */
+
 public class GameController implements InputEventListener {
 
     private Board board = new SimpleBoard(BOARD_WIDTH, BOARD_HEIGHT);
@@ -25,6 +30,11 @@ public class GameController implements InputEventListener {
     // Track lock delay
     private boolean lockDelayActive = false;
 
+    /**
+     * Constructs a GameController and initializes the game.
+     * @param c the GUI controller
+     * @param mode the game mode to play
+     */
     public GameController(GuiController c, GameMode mode) {
         viewGuiController = c;
         highScore = HighScore.getInstance();
@@ -45,10 +55,20 @@ public class GameController implements InputEventListener {
         }
     }
 
+    /**
+     * Gets the SimpleBoard instance.
+     * @return the game board
+     */
     public SimpleBoard getSimpleBoard() {
         return simpleBoard;
     }
 
+    /**
+     * Handles downward movement events from user input or automatic timer.
+     * Implements lock delay mechanism and processes line clearing.
+     * @param event the move event containing source and type information
+     * @return DownData containing cleared row information and updated view state
+     */
     @Override
     public DownData onDownEvent(MoveEvent event) {
         boolean canMove = board.moveBrickDown();
@@ -97,6 +117,9 @@ public class GameController implements InputEventListener {
         return new DownData(clearRow, board.getViewData());
     }
 
+    /**
+     * Checks if game mode objectives are completed.
+     */
     private void checkGameModeCompletion() {
         if (simpleBoard == null) return;
 
@@ -112,6 +135,9 @@ public class GameController implements InputEventListener {
         }
     }
 
+    /**
+     * Handles Sprint mode completion logic.
+     */
     private void endSprintMode() {
         long completionTime = System.currentTimeMillis() - simpleBoard.getGameStartTime();
         simpleBoard.setCompletionTime(completionTime);
@@ -124,6 +150,9 @@ public class GameController implements InputEventListener {
         viewGuiController.showSprintComplete(completionTime, isNewRecord, highScore);
     }
 
+    /**
+     * Handles Blitz mode time-up logic.
+     */
     private void endBlitzMode() {
         int finalScore = board.getScore().scoreProperty().get();
 
@@ -135,6 +164,9 @@ public class GameController implements InputEventListener {
         viewGuiController.showBlitzComplete(finalScore, isNewRecord, highScore);
     }
 
+    /**
+     * Handles game over state and record checking.
+     */
     private void handleGameOver() {
         // Check for Pitfall high scores on game over
         if (simpleBoard != null && simpleBoard.getGameMode() == GameMode.PITFALL) {
@@ -158,6 +190,12 @@ public class GameController implements InputEventListener {
         }
     }
 
+    /**
+     * Handles hard drop events, dropping the brick instantly to the bottom.
+     * Awards points based on the number of rows dropped.
+     * @param event the move event containing source information
+     * @return DownData containing cleared row information and updated view state
+     */
     @Override
     public DownData onDropEvent(MoveEvent event) {
         lockDelayActive = false;
@@ -190,6 +228,12 @@ public class GameController implements InputEventListener {
         return new DownData(clearRow, board.getViewData());
     }
 
+    /**
+     * Handles leftward movement of the current brick.
+     * Resets lock delay when movement occurs.
+     * @param event the move event containing source information
+     * @return ViewData containing the updated brick position
+     */
     @Override
     public ViewData onLeftEvent(MoveEvent event) {
         board.moveBrickLeft();
@@ -197,6 +241,12 @@ public class GameController implements InputEventListener {
         return board.getViewData();
     }
 
+    /**
+     * Handles rightward movement of the current brick.
+     * Resets lock delay when movement occurs.
+     * @param event the move event containing source information
+     * @return ViewData containing the updated brick position
+     */
     @Override
     public ViewData onRightEvent(MoveEvent event) {
         board.moveBrickRight();
@@ -204,6 +254,12 @@ public class GameController implements InputEventListener {
         return board.getViewData();
     }
 
+    /**
+     * Handles counter-clockwise rotation of the current brick.
+     * Resets lock delay when rotation occurs.
+     * @param event the move event containing source information
+     * @return ViewData containing the updated brick rotation state
+     */
     @Override
     public ViewData onRotateLeftEvent(MoveEvent event) {
         board.rotateLeftBrick();
@@ -211,6 +267,12 @@ public class GameController implements InputEventListener {
         return board.getViewData();
     }
 
+    /**
+     * Handles clockwise rotation of the current brick.
+     * Resets lock delay when rotation occurs.
+     * @param event the move event containing source information
+     * @return ViewData containing the updated brick rotation state
+     */
     @Override
     public ViewData onRotateRightEvent(MoveEvent event) {
         board.rotateRightBrick();
@@ -218,6 +280,12 @@ public class GameController implements InputEventListener {
         return board.getViewData();
     }
 
+    /**
+     * Handles hold action, swapping current brick with held brick.
+     * Resets lock delay and updates the view.
+     * @param event the move event containing source information
+     * @return ViewData containing the updated view state after holding
+     */
     @Override
     public ViewData onHoldEvent(MoveEvent event) {
         board.holdCurrentBrick();  // Run the hold function
@@ -225,6 +293,10 @@ public class GameController implements InputEventListener {
         return board.getViewData();  // Return updated view
     }
 
+    /**
+     * Creates a new game, resetting all game state.
+     * Resets lock delay and refreshes the game board display.
+     */
     @Override
     public void createNewGame() {
         board.newGame();
@@ -232,6 +304,10 @@ public class GameController implements InputEventListener {
         viewGuiController.refreshGameBackground(board.getBoardMatrix());
     }
 
+    /**
+     * Gets the current view data representing the game state.
+     * @return ViewData containing current brick and board information
+     */
     @Override
     public ViewData getCurrentViewData() {
         return board.getViewData();

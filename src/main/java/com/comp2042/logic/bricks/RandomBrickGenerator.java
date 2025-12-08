@@ -3,6 +3,11 @@ package com.comp2042.logic.bricks;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Implementation of BrickGenerator using the 7-bag randomization system.
+ * Ensures fair distribution by cycling through all 7 brick types before repeating.
+ */
+
 public class RandomBrickGenerator implements BrickGenerator {
 
     private final List<Brick> brickList;
@@ -13,6 +18,9 @@ public class RandomBrickGenerator implements BrickGenerator {
     // Show 4 future bricks
     private static final int NEXT_BRICKS_COUNT = 4;
 
+    /**
+     * Constructs a new RandomBrickGenerator and initializes the brick queue.
+     */
     public RandomBrickGenerator() {
         brickList = new ArrayList<>();
         brickList.add(new IBrick());
@@ -28,6 +36,10 @@ public class RandomBrickGenerator implements BrickGenerator {
         }
     }
 
+    /**
+     * Adds a brick from the bag to the next bricks queue.
+     * Refills the bag when empty using shuffled brick types.
+     */
     // Method to handle the Bag System logic
     private void addBrickFromBag() {
         if (bag.isEmpty()) {
@@ -40,6 +52,10 @@ public class RandomBrickGenerator implements BrickGenerator {
         nextBricks.add(bag.poll());
     }
 
+    /**
+     * Gets the next brick and advances the queue.
+     * @return the next Brick to be played
+     */
     @Override
     public Brick getBrick() {
         if (nextBricks.size() <= NEXT_BRICKS_COUNT) {
@@ -48,11 +64,20 @@ public class RandomBrickGenerator implements BrickGenerator {
         return nextBricks.poll();
     }
 
+    /**
+     * Previews the next brick without consuming it.
+     * @return the Brick at the front of the queue
+     */
     @Override
     public Brick getNextBrick() {
         return nextBricks.peek();
     }
 
+    /**
+     * Gets a list of upcoming bricks for preview purposes.
+     * @param count the number of future bricks to retrieve
+     * @return list of upcoming Brick instances
+     */
     // Method to add "future" bricks in a list
     @Override
     public List<Brick> getNextBricks(int count) {
